@@ -163,7 +163,7 @@ public class Main {
             String input = scanner.nextLine();
 
             // Silently consume all ignored lines (empty commands)
-            while (input.trim().isEmpty()) {
+            while (input.trim().isEmpty() || input.trim().charAt(0) == '#') {
                 input = scanner.nextLine();
             }
             return input;
