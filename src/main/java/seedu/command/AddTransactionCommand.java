@@ -12,7 +12,7 @@ public abstract class AddTransactionCommand extends Command {
         this.transactions = transactions;
     }
 
-    public abstract List<String> execute() throws Exception ;
+    public abstract List<String> execute();
 
     protected abstract Transaction createTransaction(double amount, String description, String date) throws Exception;
 

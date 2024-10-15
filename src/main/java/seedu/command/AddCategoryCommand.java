@@ -25,7 +25,11 @@ public class AddCategoryCommand extends Command {
         }
         String categoryName = arguments.get("");
         Category category = new Category(categoryName);
-        categoryList.addCategory(category);
+        Category temp = categoryList.addCategory(category);
+
+        if(temp == null){
+            return List.of("Duplicated category.");
+        }
         return List.of("Category added: " + categoryName);
     }
     @Override

@@ -13,7 +13,7 @@ public class Expense extends Transaction {
 
     public Expense(double amount, String description, String date) throws Exception {
         super(amount, description, date);
-        this.category = null;
+        this.category = new Category("");
     }
 
     public Category getCategory() {

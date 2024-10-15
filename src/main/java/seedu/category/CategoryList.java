@@ -24,19 +24,20 @@ public class CategoryList {
     }
 
     // Add Category
-    public void addCategory(Category newCategory) {
+    public Category addCategory(Category newCategory) {
         for (Category category : this.categories) {
             if (category.getName().equalsIgnoreCase(newCategory.getName())) {
                 logger.log(Level.INFO, "Category '" + newCategory.getName() + "' already exists!");
-                return;
+                return null;
             }
         }
         categories.add(newCategory);
         logger.log(Level.INFO, "Category '" + newCategory.getName() + "' added successfully.");
+        return newCategory;
     }
 
     // Delete Category
-    public void deleteCategory(String categoryName) {
+    public Category deleteCategory(String categoryName) {
         Category toDelete = null;
         for (Category category : categories) {
             if (category.getName().equalsIgnoreCase(categoryName)) {
@@ -50,6 +51,7 @@ public class CategoryList {
         } else {
             logger.log(Level.INFO, "Category '" + categoryName + "' not found!");
         }
+        return toDelete;
     }
 
 

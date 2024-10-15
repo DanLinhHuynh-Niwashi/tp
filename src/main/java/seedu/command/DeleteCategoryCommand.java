@@ -1,5 +1,6 @@
 package seedu.command;
 
+import seedu.category.Category;
 import seedu.category.CategoryList;
 
 import java.util.List;
@@ -27,7 +28,11 @@ public class DeleteCategoryCommand extends Command {
             return List.of(LACK_ARGUMENTS_ERROR_MESSAGE);
         }
         String categoryName = arguments.get("");
-        categoryList.deleteCategory(categoryName);
+        Category temp = categoryList.deleteCategory(categoryName);
+
+        if(temp == null){
+            return List.of("Category not found.");
+        }
         return List.of("Category deleted: " + categoryName);
     }
     @Override

@@ -13,13 +13,14 @@ public class AddIncomeCommand extends AddTransactionCommand {
     public static final String COMMAND_GUIDE = "add-income [DESCRIPTION] [a/ AMOUNT] [d/ DATE]";
     public static final String[] COMMAND_MANDATORY_KEYWORDS = {"a/"};
     public static final String[] COMMAND_EXTRA_KEYWORDS = {"d/"};
+    public static final String ERROR_MESSAGE = "Error creating Income!";
 
     public AddIncomeCommand(TransactionList transactions) {
         super(transactions);
     }
 
     @Override
-    public List<String> execute() throws Exception{
+    public List<String> execute() {
         if (!isArgumentsValid()) {
             return List.of(LACK_ARGUMENTS_ERROR_MESSAGE);
         }
@@ -36,11 +37,19 @@ public class AddIncomeCommand extends AddTransactionCommand {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
             dateString = LocalDateTime.now().format(formatter);
         }
+        double amount;
+        try {
+            amount = Double.parseDouble(amountString);
+        } catch (NumberFormatException e) {
+            return List.of("Invalid amount");
+        }
+        try {
+            transactions.addTransaction(createTransaction(amount, incomeName, dateString));
+            return List.of("Income added successfully!");
+        } catch (Exception e) {
+            return List.of(ERROR_MESSAGE + ": " + e.getMessage());
+        }
 
-        double amount = Double.parseDouble(amountString);
-
-        transactions.addTransaction(createTransaction(amount, incomeName, dateString));
-        return List.of("Income added successfully!");
     }
 
     @Override

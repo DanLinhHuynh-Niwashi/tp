@@ -19,6 +19,10 @@ public class TransactionList {
         initializeDefaultTransactions();
     }
 
+    public int size() {
+        return transactions.size();
+    }
+
     private void initializeDefaultTransactions() {
         // Optionally initialize with some default transactions if needed.
     }
@@ -26,21 +30,23 @@ public class TransactionList {
     public void addTransaction(Transaction transaction) {
         transactions.add(transaction);
         // Sort transactions by date after adding
-        // Sort transactions using the custom compareDdateTime method
+        // Sort transactions using the custom compareDateTime method
         transactions.sort((t1, t2) -> {
             LocalDateTime dateTime1 = t1.getDate();
             LocalDateTime dateTime2 = t2.getDate();
             return DateTimeUtils.compareDateTime(dateTime1, dateTime2) ? -1 : 1;
         });
-        System.out.println("Transaction added: " + transaction);
+        logger.log(Level.INFO,"Transaction added: " + transaction);
     }
 
-    public void deleteTransaction(int index) {
+    public Transaction deleteTransaction(int index) {
         if (index >= 0 && index < transactions.size()) {
             Transaction removed = transactions.remove(index);
             logger.log(Level.INFO,"Transaction removed: " + removed);
+            return removed;
         } else {
             logger.log(Level.INFO, "Invalid transaction index!");
+            return null;
         }
     }
 

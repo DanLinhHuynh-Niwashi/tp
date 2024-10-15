@@ -15,12 +15,14 @@ public class AddExpenseCommand extends AddTransactionCommand {
     public static final String[] COMMAND_MANDATORY_KEYWORDS = {"a/"};
     public static final String[] COMMAND_EXTRA_KEYWORDS = {"d/", "c/"};
 
+    public static final String ERROR_MESSAGE = "Error creating Income!";
+
     public AddExpenseCommand(TransactionList transactions) {
         super(transactions);
     }
 
     @Override
-    public List<String> execute() throws Exception {
+    public List<String> execute() {
         if (!isArgumentsValid()) {
             return List.of(LACK_ARGUMENTS_ERROR_MESSAGE);
         }
@@ -33,7 +35,12 @@ public class AddExpenseCommand extends AddTransactionCommand {
 
         // Retrieve and parse amount
         String amountString = arguments.get(COMMAND_MANDATORY_KEYWORDS[0]);
-        double amount = Double.parseDouble(amountString);
+        double amount;
+        try {
+            amount = Double.parseDouble(amountString);
+        } catch (NumberFormatException e) {
+            return List.of("Invalid amount");
+        }
 
         // Handle missing date
         String dateString = arguments.get(COMMAND_EXTRA_KEYWORDS[0]);
@@ -51,9 +58,17 @@ public class AddExpenseCommand extends AddTransactionCommand {
 
         Transaction transaction;
         if (category != null) {
-            transaction = createTransaction(amount, expenseName, dateString, category);
+            try {
+                transaction = createTransaction(amount, expenseName, dateString, category);
+            } catch (Exception e) {
+                return List.of(ERROR_MESSAGE);
+            }
         } else {
-            transaction = createTransaction(amount, expenseName, dateString);
+            try {
+                transaction = createTransaction(amount, expenseName, dateString);
+            } catch (Exception e) {
+                return List.of(ERROR_MESSAGE + ": " + e.getMessage());
+            }
         }
         transactions.addTransaction(transaction);
 

@@ -22,7 +22,7 @@ public abstract class Command {
     protected Map<String, String> arguments = new HashMap<>(); // A map to hold command arguments
 
     // Abstract methods for subclasses to execute the command
-    public abstract List<String> execute() throws Exception ;
+    public abstract List<String> execute();
 
     protected boolean isArgumentsValid () {
         for (String key: getMandatoryKeywords()) {
