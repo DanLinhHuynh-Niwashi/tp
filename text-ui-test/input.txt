@@ -1,7 +1,63 @@
-James Gosling
+# Adding Categories
+# Duplicated
+add-category Food
+add-category Transport
+
+# Normal case
+add-category Amusement Park
+
+# Adding Income
+add-income Salary a/ 5000 d/ 2024-01-15 2300
+add-income Wage a/ 1000 d/ 2024-01-15
+# Invalid amount
+add-income Gift a/ 200ddd d/ 2024-01-31
+# Invalid date
+add-income Salary a/ 3000 d/ 2024-01-32 ddd
+
+# Adding Expenses
+add-expense Groceries a/ 150 d/ 2024-01-20 c/ Food
+# Invalid amount
+add-expense Shopping a/ 200dd d/ 2024-01-31 c/ Entertainment
+# No category
+add-expense Movie a/ 12 d/ 2024-02-10
+# Invalid date
+add-expense Dinner a/ 100 d/ Dinner 2024-01-15 c/ Food
+
+
+# Viewing Categories
 view-category
-add-category Cosmetic
-delete-category
+
+# Deleting Category
 delete-category Food
-view-category
+# Attempt to delete a category that doesn't exist
+delete-category NonExistent
+
+# Deleting Transactions
+# Delete first transaction
+delete-transaction i/ 1
+# Attempt to delete non-existent transaction
+delete-transaction i/ 99
+
+# Viewing Expenses
+view-expense c/ Food f/ 2024-01-01 t/ 2024-01-31
+view-expense c/ NoneCategory f/ 2024-01-01 t/ 2024-01-31
+view-expense f/ 2024-01-01 t/ 2024-01-31
+# Invalid Date
+view-expense f/ 2024-41-01 t/ 2024-01-31
+
+# Viewing Income
+view-income f/ 2024-01-01 t/ 2024-01-31
+# Invalid Date
+view-income f/ 2024-41-01
+
+# Wrong key
+view-income d/ 2024-11-01
+
+# Viewing Total
+view-total
+
+# Transaction History
+history f/ 2024-01-01 t/ 2024-01-31
+
+# Ending the chat
 bye
