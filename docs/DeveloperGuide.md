@@ -61,7 +61,8 @@ The `Category` class encapsulates the name of a category and provides functional
 ### TransactionList
 The `TransactionList` class is responsible for storing user transactions of different types. It also provides various
 operations that enable user to add, delete, search by (date/ category/ keywords).
-    ![TransactionList](./diagrams/TransactionList/transactionlist-class-diagram.png)
+
+![TransactionList](./diagrams/TransactionList/transactionlist-class-diagram.png)
     
 #### Class Responsibilities
 
@@ -118,7 +119,7 @@ The `Command` class is an abstract class that provide a common behavior that oth
 
 #### Class responsibilities
 1. **Defining common structure**: It provides common fields that ensure consistency across all concrete command classes that extend Command.
-2. **Defining common behavior**: It provides a template for commands by the abstract methods (e.g. `getMandatoryKeywords()`, `execute()`, etc.), the class enables developers to add new commands by simply extending the base class and implementing the specific behavior for each command.
+2. **Defining common behavior**: It provides a template for commands by the abstract methods (e.g. `execute()`, etc.), the class enables developers to add new commands by simply extending the base class and implementing the specific behavior for each command.
 3. **Defining some reusable methods**: It provides some common methods (e.g. `isArgumentsValid()`, `setArguments()`, `getArguments()`, etc.) across child classes.
 
 #### Class attributes
@@ -134,19 +135,16 @@ The `Command` class is an abstract class that provide a common behavior that oth
     - Description: A map storing argument strings along with its keyword.
 
 #### Class main methods
-1. **Abstract Getter for the static variables**
-    - **Returns**: The static variable associated with the getter.
-    - **Responsibility**: To help the outer world accessing the overridden static values of each child classes, without knowing the exact class
-
-2. **execute(): abstract void**
+1. **execute(): abstract void**
     - **Responsibility**: Act as a template for the child classes.
 
-3. **isArgumentsValid(): boolean**
+2. **isArgumentsValid(): boolean**
     - **Returns**: `true` if the `arguments` map contains all the mandatory keywords, `false` otherwise. Can be reused by the child classes.
       
 ### AddIncomeCommand
 The `AddIncomeCommand` class inherits Command class, handles the logic for adding an income transaction to the `TransactionList` by parsing input arguments, creating a new `Income` instance, and updating the transaction list.
-    ![AddIncomeCommand](./diagrams/addincomecommand/addincomecommand-class-diagram.png)
+
+![AddIncomeCommand](./diagrams/addincomecommand/addincomecommand-class-diagram.png)
 
 #### Class responsibilities
 
