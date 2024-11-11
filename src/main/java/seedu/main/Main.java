@@ -130,14 +130,17 @@ public class Main {
         double todaySpending = transactions.getTodaySpending();
 
         double monthSpending = transactions.getMonthSpending();
-        ui.printMessage("Expenses for " + LocalDateTime.now().getMonth() + ": $" + monthSpending);
+        ui.printMessage("Expenses for " + LocalDateTime.now().getMonth()
+                + ": $" + String.format("%.2f", monthSpending));
+        
         double monthIncome = transactions.getMonthIncome();
-        ui.printMessage("Incomes for " + LocalDateTime.now().getMonth() + ": $" + monthIncome);
-        String reminder = "Reminder: Please check if your spending is within your budget!";
-        ui.printMessage("Today's total spending: $" + todaySpending);
+        ui.printMessage("Incomes for " + LocalDateTime.now().getMonth()
+                + ": $" + String.format("%.2f", monthIncome));
+
+        ui.printMessage("Today's total spending: $" + String.format("%.2f", todaySpending));
         YearMonth currentMonth = YearMonth.now();
         Double monthlyBudget = budgetTracker.getMonthlyBudget(currentMonth);
-        //System.out.println(monthlyBudget);
+
         if (monthlyBudget != null) {
             double monthlyExpense = budgetTracker.getMonthlyExpense(currentMonth);
             double remaining = monthlyBudget - monthlyExpense;
