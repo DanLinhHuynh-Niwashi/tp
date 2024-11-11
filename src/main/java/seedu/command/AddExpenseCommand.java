@@ -76,10 +76,13 @@ public class AddExpenseCommand extends AddTransactionCommand {
         } catch (Exception e) {
             return List.of(CommandResultMessages.ADD_TRANSACTION_FAIL + e.getMessage());
         }
+
         transactions.addTransaction(temp);
         Storage.saveTransaction(transactions.getTransactions());
         List<String> messages = new ArrayList<>();
         messages.add(CommandResultMessages.ADD_TRANSACTION_SUCCESS + temp.toString());
+
+        // Print current list
         messages.add(InfoMessages.CURRENT_LIST);
         List<Transaction> transactionList = transactions.getTransactions();
         for (Transaction transaction: transactionList) {

@@ -22,6 +22,7 @@ public class AmountUtils {
 
         try {
             amount = Double.parseDouble(amountString);
+            amount = Math.round(amount * 100.0) / 100.0;
         } catch (NumberFormatException e) {
             throw new InvalidAmountFormatException(ErrorMessages.INVALID_AMOUNT_FORMAT + amountString);
         }

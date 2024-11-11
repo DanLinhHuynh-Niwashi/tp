@@ -65,6 +65,8 @@ public class AddIncomeCommand extends AddTransactionCommand {
             // Print current transaction list
             List<String> messages = new ArrayList<>();
             messages.add(CommandResultMessages.ADD_TRANSACTION_SUCCESS + temp.toString());
+
+            // Print current list
             messages.add(InfoMessages.CURRENT_LIST);
             List<Transaction> transactionList = transactions.getTransactions();
             for (Transaction transaction: transactionList) {
