@@ -2,15 +2,17 @@ package seedu.command;
 
 import seedu.budget.BudgetTracker;
 import seedu.datastorage.Storage;
+import seedu.exceptions.InvalidAmountFormatException;
 import seedu.message.ErrorMessages;
 import seedu.message.CommandResultMessages;
 import seedu.utils.AmountUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AddBudgetCommand extends Command {
     public static final String COMMAND_WORD = "add-budget";
-    public static final String COMMAND_GUIDE = "add-budget a/ AMOUNT m/ MONTH : Add a new category";
+    public static final String COMMAND_GUIDE = "add-budget a/ AMOUNT m/ MONTH : Set a new month budget";
     public static final String[] COMMAND_MANDATORY_KEYWORDS = { "a/", "m/" };
     public static final String[] COMMAND_EXTRA_KEYWORDS = {};
 
@@ -23,14 +25,17 @@ public class AddBudgetCommand extends Command {
     @Override
     public List<String> execute() {
         if (!isArgumentsValid()) {
-            return List.of(ErrorMessages.LACK_ARGUMENTS_ERROR_MESSAGE);
+            List<String> messages = new ArrayList<>();
+            messages.add(ErrorMessages.LACK_ARGUMENTS_ERROR_MESSAGE);
+            messages.add(COMMAND_GUIDE);
+            return messages;
         }
 
         String amountStr = arguments.get(COMMAND_MANDATORY_KEYWORDS[0]);
         Double amount = null;
         try {
             amount = AmountUtils.parseAmount(amountStr);
-        } catch (Exception e) {
+        } catch (InvalidAmountFormatException e) {
             return List.of(CommandResultMessages.SET_BUDGET_FAIL + e.getMessage());
         }
 

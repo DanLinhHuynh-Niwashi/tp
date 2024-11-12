@@ -1,15 +1,25 @@
 package seedu.budget;
 
 import seedu.exceptions.InvalidDateFormatException;
+
+import seedu.message.BudgetMessages;
 import seedu.message.ErrorMessages;
+
 import seedu.transaction.Transaction;
 import seedu.transaction.Expense;
 import seedu.transaction.TransactionList;
+
 import seedu.utils.DateTimeUtils;
+
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.HashMap;
+
 import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +31,7 @@ import java.util.logging.Logger;
 public class BudgetTracker {
     private static final Logger logger = Logger.getLogger("BudgetTracker");
     private Map<YearMonth, Double> monthlyBudgets;
-    private TransactionList transactionList;
+    private final TransactionList transactionList;
 
     /**
      * Constructs a BudgetTracker with the specified transaction list.
@@ -41,10 +51,6 @@ public class BudgetTracker {
      */
     public void setBudget(String monthStr, double budgetAmount) throws IllegalArgumentException {
         YearMonth month;
-
-        if (budgetAmount < 0) {
-            throw new IllegalArgumentException("Budget amount cannot be negative");
-        }
 
         try {
             month = DateTimeUtils.parseYearMonth(monthStr);
@@ -79,6 +85,18 @@ public class BudgetTracker {
         return monthlyBudgets.get(month);
     }
 
+    public List<String> getAllBudgets() {
+        Map<YearMonth, Double> sortedBudgets = new TreeMap<>(monthlyBudgets);
+        List<String> budgets = new ArrayList<>();
+
+        int index = 1;
+        for (Map.Entry<YearMonth, Double> entry : sortedBudgets.entrySet()) {
+            budgets.add(String.format("%d. Budget for %s: $%.2f", index++, entry.getKey(), entry.getValue()));
+        }
+
+        return budgets.isEmpty() ? List.of("No budgets set.") : budgets;
+    }
+
     /**
      * Calculates the total expenses for a specified month.
      *
@@ -103,18 +121,16 @@ public class BudgetTracker {
         double projectedSpending = (currentMonthExpense / currentDay) * daysInMonth;
 
         if (currentMonthExpense > budget) {
-            return String.format("Warning! You've already exceeded your budget for %s. Spent: $%.2f, Budget: $%.2f.",
+            return String.format(BudgetMessages.WARNING_EXCEEDED_BUDGET,
                     month, currentMonthExpense, budget);
         }
 
         if (projectedSpending <= budget) {
-            return String.format("Great job! You're on track. Spent so far: $%.2f, " +
-                            "Projected spending: $%.2f (within the budget of $%.2f).",
+            return String.format(BudgetMessages.GREAT_JOB_ON_TRACK,
                     currentMonthExpense, projectedSpending, budget);
         }
 
-        return String.format("Caution! You're on track to exceed the budget. Spent so far: $%.2f, " +
-                        "Projected spending: $%.2f, Budget: $%.2f.",
+        return String.format(BudgetMessages.CAUTION_PROJECTED_EXCEED,
                 currentMonthExpense, projectedSpending, budget);
     }
 
@@ -123,13 +139,11 @@ public class BudgetTracker {
         double expense = getMonthlyExpense(month);
 
         if (expense > budget) {
-            return String.format("Budget Exceeded! You spent $%.2f out of your budget of $%.2f." +
-                            " Consider reviewing your expenses for better control in future months.",
-                    expense, budget);
+            return String.format(BudgetMessages.BUDGET_EXCEEDED_PAST,
+                    expense, budget, month);
         }
 
-        return String.format("Well Done! You stayed within your budget for %s. Spent: $%.2f," +
-                        " Budget: $%.2f. Keep up the good work!",
+        return String.format(BudgetMessages.WELL_DONE_WITHIN_BUDGET,
                 month, expense, budget);
     }
 

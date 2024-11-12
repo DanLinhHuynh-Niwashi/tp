@@ -31,7 +31,7 @@ public class DateTimeUtils {
 
         // If only the date is provided, append time as "2359" (11:59 PM)
         if (datetimeParts.length == 1) {
-            datetime += " 2359";
+            datetime += " 0000";
         }
 
         LocalDateTime result;

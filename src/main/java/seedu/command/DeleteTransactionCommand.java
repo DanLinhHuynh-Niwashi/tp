@@ -3,6 +3,7 @@ package seedu.command;
 import seedu.datastorage.Storage;
 import seedu.message.ErrorMessages;
 import seedu.message.CommandResultMessages;
+import seedu.message.InfoMessages;
 import seedu.transaction.Transaction;
 import seedu.transaction.TransactionList;
 
@@ -49,7 +50,17 @@ public class DeleteTransactionCommand extends Command {
         Transaction temp = transactions.getTransactions().get(index-1);
         transactions.deleteTransaction(index-1);
         Storage.saveTransaction(transactions.getTransactions());
-        return List.of(CommandResultMessages.DELETE_TRANSACTION_SUCCESS + temp.toString());
+
+        List<String> messages = new ArrayList<>();
+        messages.add(CommandResultMessages.DELETE_TRANSACTION_SUCCESS + index+". " +temp.toString());
+
+        // Print current transaction list
+        messages.add(InfoMessages.CURRENT_LIST);
+        List<Transaction> transactionList = transactions.getTransactions();
+        for (Transaction transaction: transactionList) {
+            messages.add(transactionList.indexOf(transaction) + 1 +". "+transaction.toString());
+        }
+        return messages;
     }
 
     @Override

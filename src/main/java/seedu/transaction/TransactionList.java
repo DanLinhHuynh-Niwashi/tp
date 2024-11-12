@@ -7,6 +7,7 @@ import seedu.utils.DateTimeUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
  */
 public class TransactionList {
     private static final Logger logger = Logger.getLogger("TransactionList");
-    private ArrayList<Transaction> transactions;
+    private  ArrayList<Transaction> transactions;
     private final Map<String, List<Transaction>> invertedIndex;
 
     /**
@@ -111,7 +112,7 @@ public class TransactionList {
      * @param endTime The end time for filtering transactions.
      * @return A list of transactions between the specified times.
      */
-    public List<Transaction> getTransactionsBetween(LocalDateTime startTime, LocalDateTime endTime) {
+    public  List<Transaction> getTransactionsBetween(LocalDateTime startTime, LocalDateTime endTime) {
         return transactions.stream()
                 .filter(transaction -> (transaction.getDate().isEqual(startTime) ||
                         transaction.getDate().isAfter(startTime)) &&
@@ -141,11 +142,20 @@ public class TransactionList {
      */
     public List<Transaction> searchTransactionsByKeywords(List<String> keywords) {
         Map<Transaction, Integer> relevanceMap = new HashMap<>();
+        // Loop through each keyword
         for (String keyword : keywords) {
-            List<Transaction> matchingTransaction = invertedIndex.get(keyword.toLowerCase());
-            if (matchingTransaction != null) {
-                for (Transaction transaction : matchingTransaction) {
-                    relevanceMap.put(transaction, relevanceMap.getOrDefault(transaction, 0) + 1);
+            // Convert the keyword to lowercase for case-insensitive matching
+            String lowerCaseKeyword = keyword.toLowerCase();
+
+            // Iterate over the inverted index and check if the key contains the keyword
+            for (Map.Entry<String, List<Transaction>> entry : invertedIndex.entrySet()) {
+                String key = entry.getKey().toLowerCase();
+                if (key.contains(lowerCaseKeyword)) {
+                    // If the key contains the keyword, increment the relevance count for each transaction
+                    List<Transaction> matchingTransactions = entry.getValue();
+                    for (Transaction transaction : matchingTransactions) {
+                        relevanceMap.put(transaction, relevanceMap.getOrDefault(transaction, 0) + 1);
+                    }
                 }
             }
         }
@@ -169,6 +179,23 @@ public class TransactionList {
                 .sum();
     }
 
+
+    public double getMonthSpending() {
+        LocalDate startOfMonth = YearMonth.now().atDay(1);
+        LocalDateTime startDate = startOfMonth.atStartOfDay();
+        return transactions.stream()
+                .filter(transaction -> transaction instanceof Expense && transaction.getDate().isAfter(startDate))
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+    }
+    public double getMonthIncome() {
+        LocalDate startOfMonth = YearMonth.now().atDay(1);
+        LocalDateTime startDate = startOfMonth.atStartOfDay();
+        return transactions.stream()
+                .filter(transaction -> transaction instanceof Income && transaction.getDate().isAfter(startDate))
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+    }
     /**
      * Updates the category of an expense transaction at the specified index.
      *

@@ -21,6 +21,9 @@ public class CommandResultMessages {
     public static final String SET_BUDGET_SUCCESS = "Budget set: ";
     public static final String SET_BUDGET_FAIL = "Error setting budget: ";
 
+    public static final String DELETE_BUDGET_SUCCESS = "Budget deleted: ";
+    public static final String DELETE_BUDGET_FAIL = "Error deleting budget: ";
+
     public static final String TRACK_PROGRESS_SUCCESS = "Track progress: ";
     public static final String TRACK_PROGRESS_FAIL = "Error tracking progress: ";
 

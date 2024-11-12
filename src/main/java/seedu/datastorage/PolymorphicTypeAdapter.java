@@ -77,7 +77,7 @@ public class PolymorphicTypeAdapter<R> extends TypeAdapter<R> {
         }
         String label = labelJsonElement.getAsString();
 
-        @SuppressWarnings("unchecked")
+
         TypeAdapter<R> delegate = (TypeAdapter<R>) labelToDelegate.get(label);
         if (delegate == null) {
             throw new JsonParseException(

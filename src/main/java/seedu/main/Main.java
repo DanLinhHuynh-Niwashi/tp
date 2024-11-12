@@ -19,16 +19,22 @@ import seedu.command.ViewCategoryCommand;
 import seedu.command.ViewExpenseCommand;
 import seedu.command.ViewIncomeCommand;
 import seedu.command.ViewTotalCommand;
-import seedu.command.TrackProgressCommand;
+import seedu.command.ViewBudgetCommand;
+import seedu.command.DeleteBudgetCommand;
 import seedu.datastorage.Storage;
+
 import seedu.transaction.TransactionList;
 
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+
 
 public class Main {
 
@@ -89,6 +95,7 @@ public class Main {
             start();
             runCommandLoop();
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             logger.log(Level.WARNING, "Unknown error: " + e.getMessage());
         }
     }
@@ -107,7 +114,7 @@ public class Main {
         Storage.saveCategory(categories.getCategories());
 
         transactions = new TransactionList();
-        transactions.setTransactions(Storage.loadTransactions());
+        transactions.setTransactions(Storage.loadTransactions(categories.getCategories()));
 
         budgetTracker = new BudgetTracker(transactions);
         budgetTracker.setMonthlyBudgets(Storage.loadBudgets());
@@ -121,6 +128,11 @@ public class Main {
     public static void printWelcomeMessage() {
         ui.printMessage("Remember to record your spending today so you can track your spending accurately.");
         double todaySpending = transactions.getTodaySpending();
+
+        double monthSpending = transactions.getMonthSpending();
+        ui.printMessage("Expenses for " + LocalDateTime.now().getMonth() + ": $" + monthSpending);
+        double monthIncome = transactions.getMonthIncome();
+        ui.printMessage("Incomes for " + LocalDateTime.now().getMonth() + ": $" + monthIncome);
         String reminder = "Reminder: Please check if your spending is within your budget!";
         ui.printMessage("Today's total spending: $" + todaySpending);
         YearMonth currentMonth = YearMonth.now();
@@ -133,6 +145,9 @@ public class Main {
         }
     }
 
+
+
+
     /**
      * Signs up the Command objects.
      */
@@ -144,25 +159,26 @@ public class Main {
         HelpCommand helpCommand = new HelpCommand();
         parser.registerCommands(helpCommand);
 
-        parser.registerCommands(new AddCategoryCommand(categories));
-        parser.registerCommands(new AddIncomeCommand(transactions));
         parser.registerCommands(new AddExpenseCommand(transactions, ui, categories));
+        parser.registerCommands(new AddIncomeCommand(transactions));
+        parser.registerCommands(new AddCategoryCommand(categories));
         parser.registerCommands(new AddBudgetCommand(budgetTracker));
 
-        parser.registerCommands(new DeleteCategoryCommand(categories, transactions));
         parser.registerCommands(new DeleteTransactionCommand(transactions));
+        parser.registerCommands(new DeleteCategoryCommand(categories, transactions));
+        parser.registerCommands(new DeleteBudgetCommand(budgetTracker));
+
+        parser.registerCommands(new UpdateCategoryCommand(transactions, categories));
 
         parser.registerCommands(new ViewCategoryCommand(categories));
         parser.registerCommands(new ViewExpenseCommand(transactions));
         parser.registerCommands(new ViewIncomeCommand(transactions));
-        parser.registerCommands(new ViewTotalCommand(transactions));
         parser.registerCommands(new HistoryCommand(transactions));
 
-        parser.registerCommands(new TrackProgressCommand(budgetTracker));
+        parser.registerCommands(new ViewTotalCommand(transactions));
 
         parser.registerCommands(new KeywordsSearchCommand(transactions));
-
-        parser.registerCommands(new UpdateCategoryCommand(transactions, categories));
+        parser.registerCommands(new ViewBudgetCommand(budgetTracker));
 
         parser.registerCommands(new ByeCommand());
 
@@ -177,6 +193,7 @@ public class Main {
      */
     private static void runCommandLoop() {
         while (isRunning) {
+
             String commandString = ui.getUserInput();
             String[] commandParts = commandString.split(" ", 2);
 
@@ -192,10 +209,15 @@ public class Main {
             if (commandParts.length == 2) {
                 Map<String, String> arguments = parser.extractArguments(command, commandParts[1]);
                 command.setArguments(arguments);
+            } else {
+                command.setArguments(new HashMap<String, String>());
             }
 
             List<String> messages = command.execute();
             ui.showCommandResult(messages);
         }
+        Storage.saveCategory(categories.getCategories());
+        Storage.saveTransaction(transactions.getTransactions());
+        Storage.saveBudgets(budgetTracker.getMonthlyBudgets());
     }
 }

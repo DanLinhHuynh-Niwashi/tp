@@ -1,10 +1,16 @@
 @startuml
-abstract class Command {
+skinparam classAttributeIconSize 0
+hide circle
+abstract class "<<abstract>>\nCommand" {
     + execute(): List<String>
 }
 
 abstract class AddTransactionCommand {
+
     + execute(): List<String>
+    # parseDescription(arguments: Map<String, String>): String
+    # parseAmount(amountStr: String): Double
+    # parseDate(dateStr: String): String
     # createTransaction(amount: double, description: String, date: String): Transaction
 }
 
@@ -13,50 +19,67 @@ class AddIncomeCommand {
 }
 
 class TransactionList {
-    + addTransaction(transaction: Transaction): void
-    + getTransactions(): List<Transaction>
+    - transactions : ArrayList<Transaction>
+    - invertedIndex : Map<String, List<Transaction>>
+
+    + TransactionList()
+    + addTransaction(transaction : Transaction) : void
+    + deleteTransaction(index : int) : Transaction
+    + getTransactions() : ArrayList<Transaction>
+    + getTransactionsBetween(startTime : LocalDateTime, endTime : LocalDateTime) : List<Transaction>
+    + getExpensesByCategory(category : Category) : List<Transaction>
+    + searchTransactionsByKeywords(keywords : List<String>) : List<Transaction>
+    + getTodaySpending() : double
+    + updateCategory(index : int, newCategory : Category) : boolean
 }
 
 class Income {
     + Income(amount: double, description: String, date: String)
+    + getTransactionType() : String
 }
 
 AddTransactionCommand <|-- AddIncomeCommand
-Command <|-- AddTransactionCommand
+"<<abstract>>\nCommand" <|-- AddTransactionCommand
 AddIncomeCommand --> "1" TransactionList : uses >
 TransactionList --> "*" Income : stores >
 @enduml
 
 @startuml
-participant "User" as User
+participant ":Main" as User
+
+"User" -[hidden]> "User" :
 activate User
 
-participant "AddIncomeCommand" as AddIncomeCmd
+participant ":AddIncomeCommand" as AddIncomeCmd
 User -> AddIncomeCmd: execute()
 activate AddIncomeCmd
 
 alt Invalid arguments
     AddIncomeCmd --> User: "Error: Missing or invalid arguments"
 else Valid arguments
-    participant "Income" as IncomeClass
+    participant ":Income" as IncomeClass
     AddIncomeCmd -> IncomeClass: createTransaction(amount, description, date)
     activate IncomeClass
     IncomeClass --> AddIncomeCmd: Income instance
     deactivate IncomeClass
 
-    participant "TransactionList" as TransList
+    participant ":TransactionList" as TransList
     AddIncomeCmd -> TransList: addTransaction(Income)
     activate TransList
     TransList --> AddIncomeCmd: success
     deactivate TransList
 
-    participant "Storage" as Storage
+    participant "<<class>>\nStorage" as Storage
     AddIncomeCmd -> Storage: saveTransaction(TransactionList.getTransactions())
     activate Storage
     Storage --> AddIncomeCmd: confirmation
     deactivate Storage
 
     AddIncomeCmd --> User: "Income added successfully!"
-end
 deactivate AddIncomeCmd
+end
+
+"User" -[hidden]> "User" :
+deactivate User
+
 @enduml

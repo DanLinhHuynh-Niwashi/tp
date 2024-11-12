@@ -1,7 +1,5 @@
 package seedu.transaction;
 
-import java.util.Objects;
-
 /**
  * Represents an income transaction.
  * Extends the abstract Transaction class and provides specific implementations for income-related transactions.
@@ -45,27 +43,5 @@ public class Income extends Transaction {
     public String toString() {
         return "Income [amount=" + amount + ", description=" + description + ", date="
                 + dateTimeString + "]";
-    }
-
-    /**
-     * Compares this income transaction to the specified object.
-     *
-     * @param o The object to compare this income transaction against.
-     * @return true if the specified object is equal to this income transaction; false otherwise.
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null) {
-            return false;
-        }
-        if (!(o instanceof Income income)) {
-            return false;
-        }
-        return amount == income.amount &&
-                Objects.equals(description, income.description) &&
-                Objects.equals(dateTimeString, income.dateTimeString);
     }
 }

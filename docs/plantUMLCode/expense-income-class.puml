@@ -1,0 +1,39 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+class "<<abstract>>\nTransaction" {
+    # amount: double
+    # description: String
+    # dateTimeString: String
+    + Transaction()
+    + Transaction(double, String, String)
+    + getAmount(): double
+    + setAmount(double): void
+    + getDescription(): String
+    + setDescription(String): void
+    + getDate(): LocalDateTime
+    + setDate(LocalDateTime): void
+    + getDateTimeString(): String
+    + setDateTimeString(String): void
+    + toString(): String
+    + getTransactionType(): String
+}
+class Expense {
+    -category: Category
+    +Expense()
+    +Expense(double, String, String, Category)
+    +Expense(double, String, String)
+    +getCategory(): Category
+    +setCategory(category: Category): void
+    +getTransactionType(): String
+    +toString(): String
+}
+class Income {
+    +Income()
+    +Income(double, String, String)
+    +getTransactionType(): String
+    +toString(): String
+}
+"<<abstract>>\nTransaction" <|-- Expense
+"<<abstract>>\nTransaction" <|-- Income
+@enduml

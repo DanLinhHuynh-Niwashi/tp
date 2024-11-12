@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import seedu.category.Category;
 import seedu.category.CategoryList;
+import seedu.exceptions.InvalidCategoryNameException;
+import seedu.exceptions.InvalidDescriptionFormatException;
 import seedu.main.UI;
 import seedu.message.CommandResultMessages;
 import seedu.message.ErrorMessages;
@@ -26,6 +28,8 @@ class DeleteCategoryCommandTest {
     TransactionList transactionList;
     DeleteCategoryCommand deleteCategoryCommand;
 
+
+
     @BeforeEach
     public void setUp() {
         categoryList = new CategoryList();
@@ -37,9 +41,9 @@ class DeleteCategoryCommandTest {
                 "2024-10-10 2359", new Category("Default")));
         deleteCategoryCommand = new DeleteCategoryCommand(categoryList, transactionList);
     }
-
     @Test
-    void execute_validArgumentWithNoTransaction_categoryDeleted() {
+    void execute_validArgumentWithNoTransaction_categoryDeleted()
+            throws InvalidCategoryNameException, InvalidDescriptionFormatException {
         // Arrange
         categoryList.addCategory(new Category("Sports"));
         deleteCategoryCommand.setArguments(Map.of("", "Sports"));
@@ -56,33 +60,39 @@ class DeleteCategoryCommandTest {
     }
 
     @Test
-    void execute_validArgumentWithTransaction_recategorized() {
+    void execute_validArgumentWithTransaction_recategorized()
+            throws InvalidCategoryNameException, InvalidDescriptionFormatException {
         // Arrange
         categoryList.addCategory(new Category("Default"));
         categoryList.addCategory(new Category("NewCategory"));
-        deleteCategoryCommand.setArguments(Map.of("", "Default"));
+        deleteCategoryCommand.setArguments(Map.of("", "default"));
 
         deleteCategoryCommand.setUI(new TestUI("NewCategory"));
         // Act
         deleteCategoryCommand.execute();
         List<Category> categories = categoryList.getCategories();
         // Expected
-        List<Transaction> expectedTransaction = new ArrayList<>();
+        List<String> expectedTransactions = new ArrayList<>();
         // Add sample data to test
-        expectedTransaction.add(new Expense(1000, "",
-                "2024-10-10 2359", new Category("NewCategory")));
-        expectedTransaction.add(new Expense(1000, "",
-                "2024-10-10 2359", new Category("NewCategory")));
+        expectedTransactions.add(new Expense(1000, "",
+                "2024-10-10 2359", new Category("NewCategory")).toString());
+        expectedTransactions.add(new Expense(1000, "",
+                "2024-10-10 2359", new Category("NewCategory")).toString());
 
+        List<String> actualTransactions = new ArrayList<>();
+        for (Transaction transaction:transactionList.getTransactions()) {
+            actualTransactions.add(transaction.toString());
+        }
         // Assert
         assertEquals(1, categories.size(),
                 "The category list should have 1 category left after deletion.");
-        assertEquals(expectedTransaction, transactionList.getTransactions(),
+        assertEquals(expectedTransactions, actualTransactions,
                 "The current transaction list should update its category.");
     }
 
     @Test
-    void execute_validArgumentWithTransaction_unCategorize() {
+    void execute_validArgumentWithTransaction_unCategorize()
+            throws InvalidCategoryNameException, InvalidDescriptionFormatException {
         // Arrange
         categoryList.addCategory(new Category("Default"));
         deleteCategoryCommand.setArguments(Map.of("", "Default"));
@@ -92,22 +102,28 @@ class DeleteCategoryCommandTest {
         deleteCategoryCommand.execute();
         List<Category> categories = categoryList.getCategories();
         // Expected
-        List<Transaction> expectedTransaction = new ArrayList<>();
+        List<String> expectedTransactions = new ArrayList<>();
         // Add sample data to test
-        expectedTransaction.add(new Expense(1000, "",
-                "2024-10-10 2359", new Category("")));
-        expectedTransaction.add(new Expense(1000, "",
-                "2024-10-10 2359", new Category("")));
+        expectedTransactions.add(new Expense(1000, "",
+                "2024-10-10 2359", new Category("")).toString());
+        expectedTransactions.add(new Expense(1000, "",
+                "2024-10-10 2359", new Category("")).toString());
 
+        // Assert
+        List<String> actualTransactions = new ArrayList<>();
+        for (Transaction transaction:transactionList.getTransactions()) {
+            actualTransactions.add(transaction.toString());
+        }
         // Assert
         assertEquals(0, categories.size(),
                 "The category list should have 0 category left after deletion.");
-        assertEquals(expectedTransaction, transactionList.getTransactions(),
+        assertEquals(expectedTransactions, actualTransactions,
                 "The current transaction list should update its category.");
     }
 
     @Test
-    void execute_validArgumentWithTransaction_newCategory() {
+    void execute_validArgumentWithTransaction_newCategory()
+            throws InvalidCategoryNameException, InvalidDescriptionFormatException {
         // Arrange
         categoryList.addCategory(new Category("Default"));
         deleteCategoryCommand.setArguments(Map.of("", "Default"));
@@ -117,22 +133,28 @@ class DeleteCategoryCommandTest {
         deleteCategoryCommand.execute();
         List<Category> categories = categoryList.getCategories();
         // Expected
-        List<Transaction> expectedTransaction = new ArrayList<>();
+        List<String> expectedTransactions = new ArrayList<>();
         // Add sample data to test
-        expectedTransaction.add(new Expense(1000, "",
-                "2024-10-10 2359", new Category("NewCategory")));
-        expectedTransaction.add(new Expense(1000, "",
-                "2024-10-10 2359", new Category("NewCategory")));
+        expectedTransactions.add(new Expense(1000, "",
+                "2024-10-10 2359", new Category("NewCategory")).toString());
+        expectedTransactions.add(new Expense(1000, "",
+                "2024-10-10 2359", new Category("NewCategory")).toString());
 
+        // Assert
+        List<String> actualTransactions = new ArrayList<>();
+        for (Transaction transaction:transactionList.getTransactions()) {
+            actualTransactions.add(transaction.toString());
+        }
         // Assert
         assertEquals(1, categories.size(),
                 "The category list should have 1 category left after deletion.");
-        assertEquals(expectedTransaction, transactionList.getTransactions(),
+        assertEquals(expectedTransactions, actualTransactions,
                 "The current transaction list should update its category.");
     }
 
     @Test
-    void execute_validArgumentWithTransaction_cancel() {
+    void execute_validArgumentWithTransaction_cancel()
+            throws InvalidCategoryNameException, InvalidDescriptionFormatException {
         // Arrange
         categoryList.addCategory(new Category("Default"));
         deleteCategoryCommand.setArguments(Map.of("", "Default"));

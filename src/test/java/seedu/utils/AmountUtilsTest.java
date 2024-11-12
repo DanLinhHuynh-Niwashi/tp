@@ -1,6 +1,7 @@
 package seedu.utils;
 
 import org.junit.jupiter.api.Test;
+import seedu.exceptions.InvalidAmountFormatException;
 import seedu.message.ErrorMessages;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -11,7 +12,7 @@ class AmountUtilsTest {
     void parseAmount_invalidAmountFormat_throwsException() {
         try {
             AmountUtils.parseAmount("test");
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidAmountFormatException e) {
             assertEquals(ErrorMessages.INVALID_AMOUNT_FORMAT + "test", e.getMessage());
         }
     }
@@ -20,13 +21,14 @@ class AmountUtilsTest {
     void parseAmount_negativeAmount_throwsException() {
         try {
             AmountUtils.parseAmount("-1");
-        } catch (IllegalArgumentException e) {
-            assertEquals(ErrorMessages.INVALID_AMOUNT_FORMAT + "-1", e.getMessage());
+        } catch (InvalidAmountFormatException e) {
+            assertEquals(ErrorMessages.NEGATIVE_AMOUNT
+                            + ": " + "-1", e.getMessage());
         }
     }
 
     @Test
-    void parseAmount_validAmount_success() {
+    void parseAmount_validAmount_success() throws InvalidAmountFormatException {
         assertEquals(AmountUtils.parseAmount("10"), 10);
     }
 }

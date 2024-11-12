@@ -48,6 +48,3 @@ jobs:
         working-directory:  ${{ github.workspace }}/text-ui-test
         shell: cmd
         run: runtest.bat
-
-      - name: Install dos2unix
-        run: sudo apt-get install -y dos2unix

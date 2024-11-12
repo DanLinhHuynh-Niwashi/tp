@@ -1,4 +1,8 @@
-package seedu.datastorage;
+//@@author YukeeHong-unused
+/**
+ * This class provides JUnit Tests for the LocalDateTimeAdapter.
+ * The class is not used because LocalDateTimeAdapter is not in use.
+ */
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;

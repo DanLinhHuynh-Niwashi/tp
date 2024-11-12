@@ -44,6 +44,32 @@ class ViewExpenseCommandTest {
         inputTransactionList.addTransaction(item4);
     }
 
+    int getIndex (Transaction item) {
+        return inputTransactionList.getTransactions().indexOf(item)+1;
+    }
+
+    @Test
+    void execute_withFromAfterTo_showInvalidStartEndMessage() {
+        // Set transactions
+        viewExpenseCommand.setTransactionList(inputTransactionList);
+
+        Map<String, String> arguments = new HashMap<>();
+        arguments.put("t/", "2024-01-15");
+        arguments.put("f/", "2024-02-15");
+
+        viewExpenseCommand.setArguments(arguments);
+        // Expected messages
+        List<String> expectedMessages = new ArrayList<>();
+        expectedMessages.add(CommandResultMessages.VIEW_TRANSACTION_FAIL +
+                ErrorMessages.MESSAGE_INVALID_START_END);
+
+        // Execute the command
+        List<String> messages = viewExpenseCommand.execute();
+
+        // Verify the result
+        assertEquals(expectedMessages, messages);
+    }
+
     @Test
     void setTransactionList_newTransactionList_equalTransactionList()
             throws NoSuchFieldException, IllegalAccessException{
@@ -67,9 +93,9 @@ class ViewExpenseCommandTest {
 
         // Expected messages
         List<String> expectedMessages = new ArrayList<>();
-        expectedMessages.add("1. "+item1.toString());
-        expectedMessages.add("2. "+item2.toString());
-        expectedMessages.add("3. "+item3.toString());
+        expectedMessages.add(getIndex(item1) + ". "+item1.toString());
+        expectedMessages.add(getIndex(item2) + ". "+item2.toString());
+        expectedMessages.add(getIndex(item3) + ". "+item3.toString());
         // Execute the command
         List<String> messages = viewExpenseCommand.execute();
 
@@ -83,12 +109,12 @@ class ViewExpenseCommandTest {
         viewExpenseCommand.setTransactionList(inputTransactionList);
 
         Map<String, String> arguments = new HashMap<>();
-        arguments.put("c/", "Other");
+        arguments.put("c/", "other");
 
         viewExpenseCommand.setArguments(arguments);
         // Expected messages
         List<String> expectedMessages = new ArrayList<>();
-        expectedMessages.add("1. "+item1.toString());
+        expectedMessages.add(getIndex(item1) + ". " +item1.toString());
 
         // Execute the command
         List<String> messages = viewExpenseCommand.execute();
@@ -108,8 +134,8 @@ class ViewExpenseCommandTest {
         viewExpenseCommand.setArguments(arguments);
         // Expected messages
         List<String> expectedMessages = new ArrayList<>();
-        expectedMessages.add("1. "+item2.toString());
-        expectedMessages.add("2. "+item3.toString());
+        expectedMessages.add(getIndex(item2) + ". "+item2.toString());
+        expectedMessages.add(getIndex(item3) + ". "+item3.toString());
 
         // Execute the command
         List<String> messages = viewExpenseCommand.execute();
@@ -129,8 +155,8 @@ class ViewExpenseCommandTest {
         viewExpenseCommand.setArguments(arguments);
         // Expected messages
         List<String> expectedMessages = new ArrayList<>();
-        expectedMessages.add("1. "+item1.toString());
-        expectedMessages.add("2. "+item2.toString());
+        expectedMessages.add(getIndex(item1) + ". "+item1.toString());
+        expectedMessages.add(getIndex(item2) + ". "+item2.toString());
 
         // Execute the command
         List<String> messages = viewExpenseCommand.execute();
@@ -151,7 +177,7 @@ class ViewExpenseCommandTest {
         viewExpenseCommand.setArguments(arguments);
         // Expected messages
         List<String> expectedMessages = new ArrayList<>();
-        expectedMessages.add("1. "+item2.toString());
+        expectedMessages.add(getIndex(item2) + ". "+item2.toString());
 
         // Execute the command
         List<String> messages = viewExpenseCommand.execute();

@@ -15,7 +15,7 @@ class DateTimeUtilsTest {
     void parseDateTime_validDateWithoutTime_successParseWithTimeAs2359() throws Exception {
         // Expected datetime
         LocalDateTime expectedDateTime =
-                LocalDateTime.of(2024, 10, 23, 23, 59);
+                LocalDateTime.of(2024, 10, 23, 0, 0);
 
         // Actual parsed datetime
         LocalDateTime dateTime = DateTimeUtils.parseDateTime("2024-10-23");

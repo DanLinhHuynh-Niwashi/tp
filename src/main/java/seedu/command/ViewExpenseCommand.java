@@ -2,6 +2,7 @@ package seedu.command;
 
 import seedu.category.Category;
 import seedu.exceptions.InvalidDateFormatException;
+import seedu.exceptions.InvalidDatePeriodException;
 import seedu.message.CommandResultMessages;
 import seedu.message.ErrorMessages;
 import seedu.transaction.Expense;
@@ -58,6 +59,7 @@ public class ViewExpenseCommand extends Command {
         String startDate = arguments.get(COMMAND_EXTRA_KEYWORDS[1]);
         String endDate = arguments.get(COMMAND_EXTRA_KEYWORDS[2]);
 
+
         List<Transaction> temp;
 
         temp = transactionList.getTransactions().stream()
@@ -66,46 +68,64 @@ public class ViewExpenseCommand extends Command {
 
         if (categoryName != null) {
             Category tempCategory = new Category(categoryName);
-            temp = transactionList.getExpensesByCategory(tempCategory);
+            temp = temp.stream()
+                    .map(transaction -> (Expense) transaction)
+                    .filter(expense -> expense.getCategory().equals(tempCategory))
+                    .collect(Collectors.toList());;
         }
-        if (startDate != null) {
-            try {
-                LocalDateTime start = DateTimeUtils.parseDateTime(startDate);
+        try {
+            LocalDateTime start;
+            LocalDateTime end;
+            if (startDate != null) {
+
+                start = DateTimeUtils.parseDateTime(startDate);
                 temp = temp.stream()
                         .filter((t) -> t.getDate().isAfter(start) || t.getDate().isEqual(start))
                         .collect(Collectors.toList());
-            } catch (InvalidDateFormatException e) {
-                messages.add(CommandResultMessages.VIEW_TRANSACTION_FAIL + e.getMessage());
-                return messages;
-            } catch (Exception e) {
-                messages.add(ErrorMessages.UNEXPECTED_ERROR_MESSAGE + e.getMessage());
-                return messages;
+
+            } else {
+                start = null;
             }
-        }
-        if (endDate != null) {
-            try {
-                LocalDateTime end = DateTimeUtils.parseDateTime(endDate);
+            if (endDate != null) {
+
+                String[] datetimeParts = endDate.trim().split(" ", 2);
+
+                // If only the date is provided, append time as "0000" (00:00 AM)
+                if (datetimeParts.length == 1) {
+                    endDate += " 2359";
+                }
+
+                end = DateTimeUtils.parseDateTime(endDate);
                 temp = temp.stream()
                         .filter((t) -> t.getDate().isBefore(end) || t.getDate().isEqual(end))
                         .collect(Collectors.toList());
-            } catch (InvalidDateFormatException e) {
-                messages.add(CommandResultMessages.VIEW_TRANSACTION_FAIL + e.getMessage());
-                return messages;
-            } catch (Exception e) {
-                messages.add(ErrorMessages.UNEXPECTED_ERROR_MESSAGE + e.getMessage());
-                return messages;
-            }
-        }
 
+            } else {
+                end = null;
+            }
+
+            if (start!=null && end!=null) {
+                if (start.isAfter(end)) {
+                    throw new InvalidDatePeriodException(ErrorMessages.MESSAGE_INVALID_START_END);
+                }
+            }
+
+        } catch (InvalidDateFormatException | InvalidDatePeriodException e) {
+            messages.add(CommandResultMessages.VIEW_TRANSACTION_FAIL + e.getMessage());
+            return messages;
+        } catch (Exception e) {
+            messages.add(ErrorMessages.UNEXPECTED_ERROR_MESSAGE + e.getMessage());
+            return messages;
+        }
         if (temp.isEmpty()) {
             messages.add(CommandResultMessages.VIEW_TRANSACTION_EMPTY);
             return messages;
         }
 
-        int i = 1;
-        for (Transaction transaction: temp) {
-            messages.add(i + ". " + transaction.toString());
-            i++;
+        List<Transaction> originalList = transactionList.getTransactions();
+
+        for (Transaction transaction : temp) {
+            messages.add((originalList.indexOf(transaction)+1) + ". " + transaction.toString());
         }
 
         return messages;

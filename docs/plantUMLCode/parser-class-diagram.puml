@@ -1,8 +1,10 @@
 @startuml
 participant ":Main" as Main
+"Main" -[hidden]> "Main" :
+
 activate Main
 create "helpCommand:HelpCommand" as HelpCommand
-Main -> HelpCommand: new HelpCommand()
+Main -> HelpCommand: HelpCommand()
 
 activate HelpCommand
 
@@ -21,52 +23,53 @@ deactivate HelpCommand
 
 Parser -> HelpCommand: getField("COMMAND_WORD")
 activate HelpCommand
-alt Field found
+opt Field found
     HelpCommand --> Parser: commandWord: String
     deactivate HelpCommand
     Parser -> CommandMap: put(commandWord, helpCommand)
     activate CommandMap
 
-    CommandMap --> Parser: success
+    CommandMap --> Parser: return
 
     deactivate CommandMap
-else Field not found
-    Parser -> Parser: // Field access ignored
 end
 
 Parser --> Main: return
 deactivate Parser
+"Main" -[hidden]> "Main" :
 deactivate Main
 @enduml
 
 @startuml
-participant "Main" as Main
-
+participant ":Main" as Main
+"Main" -[hidden]> "Main" :
+activate Main
 participant "parser:Parser" as Parser
 Main -> Parser: parseCommand(commandWord:String)
-activate Main
+
 activate Parser
 
 Parser -> "commands: LinkedHashMap" as CommandMap: get(commandPart)
 activate CommandMap
 alt Command found
     CommandMap --> Parser: command: Command
-else Command not found
+else else
     CommandMap --> Parser: null
     deactivate CommandMap
 end
 
 Parser --> Main: command:Command or null
 deactivate Parser
+"Main" -[hidden]> "Main" :
 deactivate Main
 @enduml
 
 @startuml
-participant "Main" as Main
-
+participant ":Main" as Main
+"Main" -[hidden]> "Main" :
+activate Main
 participant "parser:Parser" as Parser
 Main -> Parser: extractArguments(command, argumentString)
-activate Main
 activate Parser
 
 participant "command:Command" as Command
@@ -82,8 +85,35 @@ deactivate Parser
 
 Parser --> Main: arguments:Map<String,String>
 deactivate Parser
+"Main" -[hidden]> "Main" :
 deactivate Main
 @enduml
 
+@startuml
+start
 
+if (argumentString.IsEmpty()) then (yes)
+    :Return;
+    stop
+else (no)
+    :Initialize
+    keywordIndex = -1 and keywordFound = null;
 
+    :Loop through each keyword to find the first occurrence in argumentString;
+    if (keywordIndex != -1) then (yes)
+        :Get text before keyword: beforeKeyword;
+        :arguments.put(prevKeyword, beforeKeyword);
+
+        :afterKeyword = getAfterKeyword(argumentString, keywordIndex);
+        :keywords.remove(keyword);
+
+        :Recursively call splitCommandRecursively
+        with argumentString = afterKeyword;
+        -> splitCommandRecursively;
+    else (no)
+        :arguments.put(prevKeyword, argumentString);
+    endif
+endif
+
+stop
+@enduml

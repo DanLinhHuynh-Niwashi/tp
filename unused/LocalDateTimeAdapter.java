@@ -1,3 +1,9 @@
+//@@author Gao327-unused
+/**
+ * The class handles the LocalDateTime attributes of the transactions during saving and load process.
+ * The class is not used because the implementation of Transaction is changed to using String to save
+ * the Date information for simplicity.
+ */
 package seedu.datastorage;
 
 import com.google.gson.TypeAdapter;

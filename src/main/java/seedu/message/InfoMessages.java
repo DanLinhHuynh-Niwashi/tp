@@ -7,4 +7,6 @@ public class InfoMessages {
     public static final String NO_CATEGORY_FILE_FOUND = "No existing category file found. Starting fresh.";
 
     public static final String NO_BUDGET_FILE_FOUND = "No existing budget file found. Starting fresh.";
+
+    public static final String CURRENT_LIST = "Your current transaction list: ";
 }

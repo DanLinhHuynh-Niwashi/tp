@@ -2,27 +2,126 @@
 
 ## Table of Contents
 1. [Acknowledgements](#acknowledgements)
-2. [Design & Implementation](#design--implementation)
+2. [Notes](#notes)
+3. [High-level Architecture](#high-level-architecture)
+    - [User interaction](#user-interaction)
+    - [UI layer](#ui-layer)
+    - [Command handling layer](#command-handling-layer)
+    - [Data layer](#data-layer)
+    - [Persistent storage (Editable .json files)](#persistent-storage-editable-json-files)
+    - [General system flow](#general-system-flow)
+4. [Design & Implementation](#design--implementation)
     - [Category](#category)
+    - [Transaction - Expense - Income](#transactionexpenseincome)
     - [TransactionList](#transactionlist)
     - [Command](#command)
     - [AddIncomeCommand](#addincomecommand)
+    - [ViewHistoryCommand](#viewhistorycommand)
     - [Command Parser](#command-parser)
-3. [Product Scope](#product-scope)
+5. [Product Scope](#product-scope)
     - [Target User Profile](#target-user-profile)
     - [Value Proposition](#value-proposition)
-4. [User Stories](#user-stories)
-5. [Non-Functional Requirements](#non-functional-requirements)
-6. [Glossary](#glossary)
-7. [Instructions for Manual Testing](#instructions-for-manual-testing)
+5. [User Stories](#user-stories)
+7. [Non-Functional Requirements](#non-functional-requirements)
+8. [Glossary](#glossary)
+9. [Instructions for Manual Testing](#instructions-for-manual-testing)
 
 ## Acknowledgements
 - The `Parser` is adapted from [Dan Linh's iP](https://github.com/DanLinhHuynh-Niwashi/ip/tree/master/src/main/java/niwa/parser) code, with changes to get on well with the current project 
+- The `Storage` uses external library Gson by Google from [Gson](https://github.com/google/gson.git), with changes to get on well with the current project
+
+## Notes
+- The Developer guide doesn't contain all the classes implemented in the final product, however, it contains the basic and important components, and some demonstration classes for providing an insight of how the product works.
+
+## High-level Architecture
+![Architecture](./diagrams/highArchitecture/high_level_architecture.png)
+
+### User interaction:
+
+- User - UI:
+    - The user interacts with the **UI** component via the CLI. This is where commands are input by the user.
+    - The **UI** displays the results of the commands processed by the system to the user.
+
+### UI layer:
+
+- Main - UI:
+    - The **Main** class calls the **UI** layer to get user input and display messages. It's a central point that manages the flow of execution.
+    - **UI** receives the user input and then sends it to the **Main** class for further processing.
+
+### Command handling layer:
+- **Main - Parser**:
+    - The **Main** class sends the user input (command) to the **Parser**, which is responsible for parsing the string to get correct command object and extract arguments.
+
+- **Parser - Command**:
+    - The **Parser** identifies the appropriate **Command** class based on the input, returning a specific command object (e.g., `AddExpenseCommand`, `ViewTotalCommand`, etc.).
+
+- **Main - Command**:
+    - **Main** then invokes the `execute()` method on the appropriate **Command**. The **Command** is responsible for processing the business logic related to the user request.
+
+### Data layer:
+
+- **Command - TransactionList**:
+    - **TransactionList** stores and manages all transactions (expenses and incomes). **Commands** interact with **TransactionList** to retrieve or modify transactions as needed (e.g., adding an expense, viewing a transaction).
+
+- **TransactionList - Transaction**:
+    - **TransactionList** contains individual **Transaction** objects. Each transaction represents a financial action (e.g., an expense or income), with details such as amount, description, date, or category. TransactionList provides methods to modify the list.
+
+- **Command - CategoryList**:
+    - **CategoryList** stores the categories used by transactions. **Commands** may interact with **CategoryList** to retrieve categories or modify them based on user input.
+
+- **CategoryList - Category**:
+    - **CategoryList** contains **Category** objects. Each category represents a classification for transactions, such as "Food," "Entertainment," etc. CategoryList provides methods to modify the list.
+  
+- **Command - BudgetTracker**:
+    - **BudgetTracker** handles the budgeting logic, ensuring that the user’s spending is within their defined budget. **Commands** can query **BudgetTracker** to get the current budget status or modify it.
+
+- **Command - Storage**:
+    - The **Command** interacts with **Storage** after execution to save data. For example, if a command requires adding a new transaction, the **Command** will use **Storage** to save that transaction to the file system.
+
+- **Main - Storage**:
+    - The **Main** class utilizes **Storage** to read the data on initialization.
+
+- **Storage - TransactionList, CategoryList, BudgetTracker**:
+    - **Storage** is responsible for reading and saving data to and from persistent storage (files). It manages interactions with the `transactions.json`, `categories.json`, and `budgets.json` files.
+    - **Storage** interacts with **TransactionList**, **CategoryList**, and **BudgetTracker** to load and save the relevant data.
+
+### Persistent storage (Editable .json files):
+
+- **transactions.json - Storage**:
+    - **transactions.json** is the file where all transaction data is stored. **Storage** interacts with this file to read and save transactions data.
+
+- **budgets.json - Storage**:
+    - **budgets.json** is the file where all user's budget data is stored. **Storage** interacts with this file to read and save budgets data.
+
+- **categories.json - Storage**:
+    - **categories.json** is the file contains the list of categories used to classify expenses (a subclass of transaction). **Storage** interacts with this file to load and save categories data.
+
+### General system flow
+1. **User interaction**:
+    - The **User** sends an input request to **UI**, which forwards this input (commandString) to **Main** for processing.
+
+2. **Command parsing**:
+    - **Main** splits `commandString` into `commandParts` and then calls **Parser** with the primary command identifier (`commandParts[0]`).
+    - **Parser** checks if a matching **Command** is registered. If the command is not found, **Parser** returns `null`. If the command is found, **Parser** returns the appropriate **Command** instance to **Main**.
+   
+3. **Error handling (if Command is not found)**:
+    - If no command matches, **Main** calls **UI** to print an error message.
+
+4. **Executing the command (if found)**:
+    - If the command exists, - **Main** then calls **Parser** with the secondary command argument string to extract arguments (`commandParts[1]`), **Parser** returns an `arguments` map.
+    - **Main** sets these arguments on the **Command** and then executes the command.
+    - The **Command** processes the request and returns a `result` list containing messages generated by the execution.
+
+5. **Displaying the result**:
+    - **Main** instructs **UI** to display the result to the **User**, providing feedback about the command execution.
+ 
+    ![Flow](./diagrams/highArchitecture/user_flow.png)
 
 ## Design & implementation
 ### Category
 The `Category` class encapsulates the name of a category and provides functionality for equality checks, hash code generation, and string representation. It serves as the foundational representation of a category.
 
+![Category](./diagrams/category/category-class-diagram-2.png)
 #### Class responsibilities
 1. **Attribute Encapsulation**: Encapsulates the category name to prevent external modification.
 2. **Equality Checks**: Implements equality based on the category name, allowing categories with the same name to be considered equal.
@@ -48,15 +147,49 @@ The `Category` class encapsulates the name of a category and provides functional
    - **Returns**: `true` if `obj` is a Category instance with the same name, `false` otherwise.
    - **Process**: Checks if `obj` is a Category instance and compares its name with the current `Category` object’s name.
 
+   ![Category](./diagrams/category/category-class-diagram.png)
 4. **public int hashCode()**
    - **Returns**: The hash code based on the name.
    - **Process**: Calculates the hash code for storing `Category` objects in hash-based collections.
 
-5. **public int hashCode()**
+5. **public String toString()**
    - **Returns**: The formatted description of the category
    - **Process**: Generates a string representation of the `Category` object, useful for logging and debugging.
 
-    ![Category](./diagrams/category/category-class-diagram.png)
+### Transaction - Expense - Income
+The `Transaction` class is an abstract class to provide the similar behavior for Income and Expense class. It serves as the foundational representation of a transaction.
+
+The `Expense` class stores the data of an expense and gives string presentation function. It serves as the representation of an expense.
+
+The `Income` class stores the data of an income and gives string presentation function. It serves as the representation of an income.
+
+#### Class attributes
+1. **description**: String
+   - Description: Represents the transaction description.
+
+2. **dateTimeString**: String
+   - Description: Represents the date and time for the transaction. As we use Gsom library for parsing JSON data, we store this attribute as a String.
+
+3. **amount**: Double
+   - Description: Represents the amount of a transaction.
+
+4. **category**: Category
+   - Description: Private attribute for `Expense` class, to show the category of that expense.
+   
+#### Class main Methods
+1. **public LocalDateTime getDate()**
+   - **Returns**: The parsed LocalDateTime of the Transaction as date time is primarily stored as a String
+
+2. **public String toString()**
+   - **Returns**: The formatted description of the transaction
+   - **Process**: Generates a string representation of the `Transaction` object. This method is overridden by inherited classes to get their representation string.
+
+3. **public String getTransactionType()**
+   - **Returns**: The type the transaction
+   - **Process**: This method is overridden by inherited classes to get their own type string. Used by the Storage to parse specific inherited classes into JSON file
+   
+    ![Transaction](./diagrams/transactionclass/expense-income-class.png)
+
 
 ### TransactionList
 The `TransactionList` class is responsible for storing user transactions of different types. It also provides various
@@ -71,9 +204,9 @@ operations that enable user to add, delete, search by (date/ category/ keywords)
 3. **Search Transactions**: Search `Transaction` in the `TransactionList` based on multiple keywords, date range or `category` of `Transaction`.
 
 #### Class attributes
-1. **transactions: `ArrayList<Transaction>**
+1. **transactions: `ArrayList&lt;Transaction&gt;**
     - Description: A List of `Transaction` objects stored that supports List operations.
-2. **InvertedIndex: `Map<String, List<Transaction>>**
+2. **InvertedIndex: `Map&lt;String, List&lt;Transaction&gt;&gt;**
     - Description: An inverted index implemented as a map that associates each unique keyword from transaction descriptions with a list of Transaction objects containing that keyword in their descriptions.
 
 #### Class main methods
@@ -143,6 +276,7 @@ The `Command` class is an abstract class that provide a common behavior that oth
       
 ### AddIncomeCommand
 The `AddIncomeCommand` class inherits Command class, handles the logic for adding an income transaction to the `TransactionList` by parsing input arguments, creating a new `Income` instance, and updating the transaction list.
+The other `AddExpenseCommand` has the similar logic, instead of one more checking step for category.
 
 ![AddIncomeCommand](./diagrams/addincomecommand/addincomecommand-class-diagram.png)
 
@@ -161,10 +295,10 @@ The `AddIncomeCommand` class inherits Command class, handles the logic for addin
 1. **execute()**
     - **Returns**: `List<String>`
     - **Process**:
-        1. Validates the input arguments.
-        2. Parses `amount` and `date` fields.
-        3. Instantiates a new `Income` transaction and adds it to `TransactionList`.
-        4. Calls `Storage.saveTransaction()` to persist data.
+        - Validates the input arguments.
+        - Parses `amount` and `date` fields.
+        - Instantiates a new `Income` transaction and adds it to `TransactionList`.
+        - Calls `Storage.saveTransaction()` to persist data.
 
     ![execute](./diagrams/addincomecommand/addincomecommand-class-diagram_001.png)
 
@@ -175,11 +309,43 @@ The `AddIncomeCommand` class inherits Command class, handles the logic for addin
         - `date`: Date when the income was received.
     - **Returns**: A new `Income` instance.
 
-### Command Parser
-The `Parser` class is responsible for interpreting user commands and extracting the associated arguments. It facilitates interaction between the user and the underlying command execution logic.
+### ViewHistoryCommand
+The `ViewHistoryCommand` class inherits Command class, handles the logic for viewing the current `TransactionList` by parsing input arguments and display to the user accordingly.
+The other `ViewExpenseCommand` and `ViewIncomeCommand` has the similar logic.
 
 #### Class responsibilities
-1. **Command registration**: Maintain a mapping of command words to their corresponding `Command` objects.
+
+1. **Filtering transaction list**: The command filter the transaction list and find the transaction that meets the criteria
+3. **Return filtered string list**: The command return the filtered list of transactions in string format for displaying.
+
+#### Class attributes
+1. **transactions**: `TransactionList`
+    - Description: Stores the current list of all transactions.
+
+#### Class main methods
+
+1. **execute()**
+    - **Returns**: `List<String>`
+    - **Process**: As the arguments are optional, the command do a step-by-step filter for each criteria if it found the corresponding arguments
+        - Create a copy `ArrayList<Transaction> temp` from `transactions` for filtering
+        - Check the availability of the start date
+           - If available: `temp` = `temp` filtered by start date
+
+        - Check the availability of the end date
+           - If available: `temp` = `temp` filtered by end date
+
+        - Check if the start date is after the end date
+           - If yes: throw new exception (as the start date should be before the end date)
+
+        - Return a list of stringified filtered-transactions
+
+    ![execute](./diagrams/ViewHistoryDiagram/viewhistory-flow-diagram.png)
+   
+### Command Parser
+The `Parser` class is responsible for interpreting user commands and extracting the associated arguments. It facilitates interaction between the user and the underlying command execution logic. There is only one Command Parser living through a session.
+
+#### Class responsibilities
+1. **Command registration**: Maintain a mapping of command words to their corresponding `Command` objects. This command object will maintain throughout the session and every execution will be called through it.
 2. **Command parsing**: Convert a command string entered by the user into a `Command` object.
 3. **Argument extraction**: Extract and organize the arguments associated with a given command.
    
@@ -194,6 +360,7 @@ The `Parser` class is responsible for interpreting user commands and extracting 
    - **Process**:
      - Retrieves the `COMMAND_WORD` field from the `Command` object
      - Adds the word and the command to the `commands` map.
+   - **Diagram note**: In the following registration diagram, `helpCommand` stays alive and referenced throughout the session.
     
     ![register_command](./diagrams/parser/register-command-sequence.png)
     
@@ -240,7 +407,9 @@ The `Parser` class is responsible for interpreting user commands and extracting 
        - Pass the remaining `argumentString` after the keyword to the next recursive call
      - If not found (mean that the last keyword reached):
        - Attach the remaining part with the previously found keyword and put in to `arguments`.
-           
+
+     ![getArguments](./diagrams/parser/parse-arguments-activity.png)
+   
 ## Product scope
 ### Target user profile
 #### Demographics:
@@ -295,15 +464,360 @@ uNivUSaver offers a practical solution for students who want to take control of 
 * *Budget* - A spending limit that the user set for each month, that the user can use to track if they're overspending.
 
 ## Instructions for manual testing
+### Notes
+* Note that the following instruction is just used for basic testing purpose
+* The Expected output section is not the console output.
+
+### Set up
 * Ensure that you have Java 17 or above installed.
 * Down the latest version of `uNivUSaver` from [here](https://github.com/AY2425S1-CS2113-W10-4/tp/releases).
-* Copy the file to the folder you want the program to stay in, make sure the data files `(*.json)` is in the same folder with the `uNivUSaver.jar` file.
+* Copy the file to the folder you want the program to stay in.
 * Open a command terminal, run the following:
 ```
 cd Path/to/directory # Change directory into the folder you put the jar file in
 java -jar uNivUSaver.jar # Start the program.
 ```
-
-* The data files will be read automatically
 * Type `help` to view the command list and syntax.
 * Refer to [User Guide](https://ay2425s1-cs2113-w10-4.github.io/tp/UserGuide.html) for detailed guide on command syntax.
+
+---
+
+### **1. Help command**
+#### Test case:
+
+**Prerequisites:** None
+
+**Input:**  
+- Input: `help`
+
+**Expected output:**  
+- A list of all available commands in the application is displayed, with syntax and description of their functionality.
+
+---
+
+### **2. Add expense command**
+#### Test case 1: Valid input
+
+**Prerequisites:** There is a category named Food in your category list
+
+**Input:**  
+- Input: `add-expense School fee a/ 1 d/ 2024-11-09 c/ Food`
+
+**Expected output:**  
+- The expense is successfully added with the description "School fee", with the amount of 1, the date 2024-11-09 0000, and the category Food.
+
+#### Test case 2: Valid input without a category
+
+**Prerequisites:** None
+
+**Input:**  
+- Input: `add-expense Amusement park a/ 1 d/ 2024-11-09`
+
+**Expected output:**  
+- The user is prompted to input a category since it's missing. After prompted, the expense is successfully added with the description "Amusement park", the amount of 1, the date 2024-11-09 0000, and the final choice of the category field.
+
+#### Test case 3: Valid input without a date
+
+**Prerequisites:** There is a category named Food in your category list
+
+**Input:**  
+- Input: `add-expense JustNow a/ 1 c/ Food`
+
+**Expected output:**  
+- The expense is successfully added with the description "JustNow", the amount of 1, the date is current time. 
+
+---
+
+### **3. Add income command**
+#### Test case 1: Valid input
+
+**Prerequisites:** None
+
+**Input:**  
+- Input: `add-income Monthly allowance a/ 1 d/ 2024-11-09`
+ 
+**Expected output:**  
+- The income is successfully added with the description "Monthly allowance", the amount of 1, and the date 2024-11-09 0000.
+
+#### Test case 2: Valid input without description
+
+**Prerequisites:** None
+
+**Input:**  
+- Input: `add-income a/ 1 d/ 2024-11-11`
+
+**Expected output:**  
+- The income is successfully added with the amount of 1 and the date 2024-11-11 0000. The description is missing but defaulted.
+
+---
+
+### **4. Add category command**
+#### Test case 1: Valid input
+
+**Prerequisites:** No category named 'FnB' is added to the list before
+
+**Input:**  
+- Input: `add-category FnB`
+ 
+**Expected output:**  
+- The category "FnB" is successfully added to the category list.
+
+#### Test case 2: Duplicated category
+
+**Prerequisites:** A category named 'Food' is added to the list before
+
+**Input:**  
+- Input: `add-category Food`
+
+**Expected output:**  
+- An error show that duplicated category found.
+
+---
+
+### **5. Add budget command**
+#### Test case 1: Valid input
+
+**Prerequisites:** None
+
+**Note:** You may replace the month with the current month/ future month.
+
+**Input:**  
+- Input: `add-budget a/ 1000 m/ 2024-11`
+
+**Expected output:**  
+- The budget of 1000 for the month of 2024-11 is successfully set.
+
+#### Test case 2: Past month
+
+**Prerequisites:** None
+
+**Input:**  
+- Input: `add-budget a/ 200 m/ 2023-02`
+
+**Expected output:**  
+- An error message indicates that the budget can not be set for previous months.
+
+---
+
+### **6. Delete transaction command**
+#### Test case 1: Valid input
+
+**Prerequisites:** The list must contain at least 1 transaction.
+
+**Input:**  
+- Input: `delete-transaction i/ 1`
+
+**Expected output:**  
+- The transaction at index 1 is successfully deleted from the history.
+
+---
+
+### **7. Delete category command**
+#### Test case 1: Valid input
+
+**Prerequisites:** The category list must contain the category named 'Food'
+
+**Input:**  
+- Input: `delete-category Food`
+
+**Expected output:**  
+- The user might be prompted to re-categorize some expenses. If the user doesn't choose to cancel the command, category "Food" is successfully removed from the category list.
+
+#### Test case 2: Non-existing category
+
+**Prerequisites:** The category list must not contain the category named 'NonExist'
+
+**Input:**  
+- Input: `delete-category NonExist`
+
+**Expected output:**  
+- An error message show that the category doesn't exists.
+
+---
+
+### **8. Delete budget command**
+#### Test case:
+
+**Prerequisites:** The budget list must contain the budget on 2024-11
+
+**Input:**  
+- Input: `delete-budget m/ 2024-11`
+
+**Expected output:**  
+- The budget for month 2024-11 is deleted successfully
+
+---
+
+### **9. Categorize command**
+#### Test case 1: Valid input
+
+**Prerequisites:** The category list must contain the category named 'Others', and the transaction in index 1 must be an Expense
+
+**Input:**  
+- Input: `categorize i/ 1 c/ Others`
+
+**Expected output:**  
+- The expense at index 1 is successfully updated to the category "Food".
+
+#### Test case 2: Non-existing category
+
+**Prerequisites:** The category list must not contain the category named 'NonExist', and the transaction in index 1 must be an Expense
+
+**Input:**  
+- Input: `categorize i/ 1 c/ NonExist`
+
+**Expected output:**  
+- An error message show that the category doesn't exist.
+
+---
+
+### **10. View category command**
+#### Test case:
+
+**Prerequisites:** None
+
+**Input:**  
+- Input: `view-category`
+ 
+**Expected output:**  
+- The system displays the full list of categories available in the system.
+
+---
+
+### **11. View expense command**
+#### Test case 1: With category
+
+**Prerequisites:** The list should contain some expenses in the category "Others"
+
+**Input:**  
+- Input: `view-expense c/ Others`
+ 
+**Expected output:**  
+- The system displays all expenses in the "Others" category.
+
+#### Test case 2: With date
+
+**Prerequisites:** The list should contain some expenses 
+
+**Input:**  
+- Input: `view-expense f/ 2024-11-10 t/ 2024-11-20`  
+ 
+**Expected output:**  
+- The system displays all expenses from 2024-11-10 to 2024-11-20.
+
+#### Test case 3: Without filter
+
+**Prerequisites:** The list should contain some expenses 
+
+**Input:**  
+- Input: `view-expense`
+
+**Expected output:**  
+- The system displays all expenses.
+
+---
+
+### **12. View income command**
+#### Test case 1: With date
+
+**Prerequisites:** The list should contain some incomes 
+
+**Input:**  
+- Input: `view-income f/ 2024-11-10 t/ 2024-11-20`  
+ 
+**Expected output:**  
+- The system displays all incomes from 2024-11-10 to 2024-11-20.
+
+#### Test case 2: Without filter
+
+**Prerequisites:** The list should contain some incomes 
+
+**Input:**  
+- Input: `view-income`
+
+**Expected output:**  
+- The system displays all incomes.
+
+---
+
+### **13. History command**
+#### Test case 1: With date
+
+**Prerequisites:** The list should contain some expenses and incomes 
+
+**Input:**  
+- Input: `history f/ 2024-11-10 t/ 2024-11-20`  
+ 
+**Expected output:**  
+- The system displays all transactions from 2024-11-10 to 2024-11-20.
+
+#### Test case 2: Without filter
+
+**Prerequisites:** The list should contain some expenses and incomes 
+
+**Input:**  
+- Input: `history`
+
+**Expected output:**  
+- The system displays all transactions.
+
+---
+
+### **14. View total command**
+#### Test case:
+
+**Prerequisites:** The list should contain some expenses and incomes 
+
+**Input:**  
+- Input: `view-total`
+
+**Expected output:**  
+- The system displays the total amount of money currently in the account.
+
+---
+
+### **15. Search command**
+#### Test case:
+
+**Prerequisites:** The list should contain some expenses and incomes with valid descriptions  
+
+**Input:**  
+- Input: `search k/ Month Amuse`
+ 
+**Expected output:**  
+- The system displays all transactions with the keywords partially matching "Month" or "Amuse".
+
+---
+
+### **16. View budget command**
+#### Test case 1: With specific month
+
+**Prerequisites:** The system must contain the budget in "2024-11" and should have some transaction in that period 
+
+**Input:**  
+- Input: `view-budget m/ 2024-11`
+
+**Expected output:**  
+- The system displays the progress towards the budget for 2024-11.
+
+#### Test case 2: With no month
+
+**Prerequisites:** The system should have some budget
+
+**Input:**  
+- Input: `view-budget`
+
+**Expected output:**  
+- The system displays all the budgets.
+
+---
+
+### **17. Bye command**
+#### Test case:
+**Prerequisites:** None
+
+**Input:**  
+- Input: `bye`
+ 
+**Expected output:**  
+- The application exits peacefully.

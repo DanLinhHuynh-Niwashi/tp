@@ -1,7 +1,7 @@
 @startuml
 skinparam classAttributeIconSize 0
+hide circle
 class TransactionList {
-    - transactions : ArrayList<Transaction>
     - invertedIndex : Map<String, List<Transaction>>
 
     + TransactionList()
@@ -15,7 +15,7 @@ class TransactionList {
     + updateCategory(index : int, newCategory : Category) : boolean
 }
 
-class Transaction {
+class "<<abstract>>\nTransaction" {
     -  amount : double
     - description : String
     - dateTimeString : String
@@ -27,14 +27,14 @@ class Transaction {
     + getTransactionType() : String
 }
 
-class Expense extends Transaction {
+class Expense extends "<<abstract>>\nTransaction" {
     - category : Category
 
     + getCategory() : Category
     + setCategory(category : Category) : void
 }
 
-class Income extends Transaction {
+class Income extends "<<abstract>>\nTransaction" {
     + getTransactionType() : String
 }
 
@@ -44,7 +44,7 @@ class Category {
     + getName() : String
 }
 
-TransactionList "1" --> "*" Transaction
+TransactionList "1" --> "*" "<<abstract>>\nTransaction"
 
 
 Expense --> Category

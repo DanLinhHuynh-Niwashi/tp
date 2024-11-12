@@ -35,18 +35,21 @@ class DeleteTransactionCommandTest {
         transactionList.addTransaction(testExpense);
         transactionList.addTransaction(testIncome);
     }
-
+    int getIndex (Transaction item) {
+        return transactionList.getTransactions().indexOf(item)+1;
+    }
     @Test
     void execute_validIndex_success() {
         // Arrange
         command.setArguments(Map.of("i/", "1"));
 
         // Act
+        int index = getIndex(testExpense);
         List<String> result = command.execute();
 
         // Assert
         assertEquals(1, transactionList.size());
-        assertEquals(CommandResultMessages.DELETE_TRANSACTION_SUCCESS + testExpense.toString(),
+        assertEquals(CommandResultMessages.DELETE_TRANSACTION_SUCCESS + index + ". " + testExpense.toString(),
                 result.get(0));
         assertFalse(transactionList.getTransactions().contains(testExpense));
     }
@@ -128,11 +131,12 @@ class DeleteTransactionCommandTest {
         command.setArguments(Map.of("i/", "2"));
 
         // Act
+        int index = getIndex(testIncome);
         List<String> result = command.execute();
 
         // Assert
         assertEquals(1, transactionList.size());
-        assertEquals(CommandResultMessages.DELETE_TRANSACTION_SUCCESS + testIncome.toString(),
+        assertEquals(CommandResultMessages.DELETE_TRANSACTION_SUCCESS + index + ". " + testIncome.toString(),
                 result.get(0));
         assertFalse(transactionList.getTransactions().contains(testIncome));
     }

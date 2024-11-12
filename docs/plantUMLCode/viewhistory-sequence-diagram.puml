@@ -1,0 +1,39 @@
+@startuml
+!define RECTANGLE class
+!define DIAMOND decision
+
+start
+::HistoryCommand.execute();
+
+:Retrieve temp ArrayList<Transaction> of transactions from TransactionList;
+
+if (Start date provided?) then (yes)
+    :Parse start date using DateTimeUtils;
+    :Filter temp to get transactions after start date;
+else (no)
+    :Start date = null;
+endif
+
+if (End date provided?) then (yes)
+    :Parse end date using DateTimeUtils;
+    :Filter temp to get transactions before end date;
+else (no)
+    :End date = null;
+endif
+if (Start date != null && End date != null) then (yes)
+    if (Start date is after End date?) then (yes)
+        :Throw InvalidDatePeriodException;
+        stop
+    else (no)
+    endif
+endif
+
+if (Filtered transactions empty?) then (yes)
+    :Display "No transactions found";
+    stop
+else (no)
+    :Display filtered transactions;
+endif
+
+stop
+@enduml

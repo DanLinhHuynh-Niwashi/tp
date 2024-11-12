@@ -1,10 +1,15 @@
 package seedu.command;
 
+import seedu.exceptions.FutureTransactionException;
+import seedu.exceptions.InvalidAmountFormatException;
 import seedu.exceptions.InvalidDateFormatException;
+import seedu.exceptions.InvalidDescriptionFormatException;
+import seedu.message.ErrorMessages;
 import seedu.transaction.Transaction;
 import seedu.transaction.TransactionList;
 import seedu.utils.AmountUtils;
 import seedu.utils.DateTimeUtils;
+import seedu.utils.DescriptionUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -20,20 +25,31 @@ public abstract class AddTransactionCommand extends Command {
         this.transactions = transactions;
     }
 
-    protected String parseDescription(Map<String, String> arguments) {
-        String description = arguments.get("");
+    protected String parseDescription(Map<String, String> arguments) throws InvalidDescriptionFormatException {
+        String description = DescriptionUtils.parseDescription(arguments.get(""));
         return (description == null || description.isEmpty()) ? "" : description;
     }
 
-    protected Double parseAmount(String amountStr) throws Exception {
+    protected Double parseAmount(String amountStr) throws InvalidAmountFormatException {
         return AmountUtils.parseAmount(amountStr);
     }
 
-    protected String parseDate(String dateStr) throws InvalidDateFormatException {
+    protected String parseDate(String dateStr)
+            throws InvalidDateFormatException, FutureTransactionException {
         if (dateStr == null || dateStr.isEmpty()) {
             return LocalDateTime.now().format(DEFAULT_FORMATTER);
         }
-        DateTimeUtils.parseDateTime(dateStr); // Validates the date
+        String[] datetimeParts = dateStr.trim().split(" ", 2);
+
+        // If only the date is provided, append time as "2359" (23:59 AM)
+        if (datetimeParts.length == 1) {
+            dateStr += " 0000";
+        }
+
+        LocalDateTime dateTime = DateTimeUtils.parseDateTime(dateStr); // Validates the date
+        if(dateTime.isAfter(LocalDateTime.now())) {
+            throw new FutureTransactionException(ErrorMessages.FUTURE_TRANSACTION);
+        }
         return dateStr;
     }
 

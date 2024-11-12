@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import seedu.category.Category;
 import seedu.category.CategoryList;
+import seedu.exceptions.InvalidCategoryNameException;
+import seedu.exceptions.InvalidDescriptionFormatException;
 import seedu.message.CommandResultMessages;
 import seedu.message.ErrorMessages;
 
@@ -42,7 +44,8 @@ class AddCategoryCommandTest {
     }
 
     @Test
-    void execute_duplicateCategory_failure() {
+    void execute_duplicateCategory_failure()
+            throws InvalidCategoryNameException, InvalidDescriptionFormatException {
         // Arrange
         categoryList.addCategory(new Category("Food"));
         command.setArguments(Map.of("", "Food"));

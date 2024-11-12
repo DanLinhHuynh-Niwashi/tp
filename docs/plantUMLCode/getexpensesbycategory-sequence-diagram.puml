@@ -1,0 +1,67 @@
+@startuml' Define the participants
+participant ":TransactionList" as TL
+participant "transactions : List<Transaction>" as Transactions
+participant ":Stream<Transaction>" as Stream
+participant ":Expense" as Expense
+participant ":CategoryList" as Category
+participant "result:List<Expense" as ResultList
+participant ":Transaction" as Transaction
+' TransactionList calls getExpensesByCategory
+-> TL: getExpensesByCategory(category)
+activate TL
+' TL calls transactions.stream()
+TL -> Transactions: stream()
+activate Transactions
+Transactions --> TL: Stream<Transaction>
+deactivate Transactions
+' TL receives the StreamTL --> Stream: Reference to Stream
+activate Stream
+' The terminal operation collect() triggers the execution
+TL -> Stream: collect(Collectors.toList())
+activate Stream
+' Loop through each transaction in transactions
+loop for each transaction in transactions
+    ' filter(transaction -> transaction instanceof Expense)
+    Stream -> Transaction: instanceof Expense
+    activate Transaction
+    Transaction --> Stream: boolean
+    deactivate Transaction
+    opt transaction instanceof Expense == true
+    ' map(transaction -> (Expense) transaction
+        Stream -> Transaction: (Expense) transaction
+        activate Transaction
+        Transaction --> Stream: Expense
+        deactivate Transaction
+        ' filter(expense -> expense.getCategory().equals(category))
+        Stream -> Expense: getCategory()
+        activate Expense
+        Expense --> Stream: Category
+        deactivate Expense
+        Stream -> Category: equals(category)
+        activate Category
+        Category --> Stream: boolean
+        deactivate Category
+        opt expense.getCategory().equals(category) == true
+        ' Include expense in result list
+            Stream -> ResultList: add(expense)
+            activate ResultList
+            ResultList --> Stream
+            deactivate ResultList
+            deactivate Stream
+            else
+            ' Do not include expense
+            end
+    else        ' Do not include transaction
+    end
+end
+' collect() returns the result list to TransactionList
+Stream --> TL: result:List<Expense>
+deactivate Stream
+' Destroy Stream and ResultList after final return
+"Stream" -[hidden]> "Stream" :
+destroy Stream
+destroy ResultList
+' Final return from TransactionList
+<-- TL : result:List<Expense
+deactivate TL
+@enduml

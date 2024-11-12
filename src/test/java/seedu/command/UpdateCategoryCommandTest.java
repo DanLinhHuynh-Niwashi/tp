@@ -4,9 +4,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import seedu.category.Category;
 import seedu.category.CategoryList;
+import seedu.exceptions.InvalidCategoryNameException;
+import seedu.exceptions.InvalidDescriptionFormatException;
 import seedu.message.CommandResultMessages;
 import seedu.message.ErrorMessages;
 import seedu.transaction.Expense;
+import seedu.transaction.Income;
 import seedu.transaction.Transaction;
 import seedu.transaction.TransactionList;
 
@@ -24,7 +27,8 @@ class UpdateCategoryCommandTest {
     private UpdateCategoryCommand command;
 
     @BeforeEach
-    void setUp() {
+    void setUp()
+            throws InvalidCategoryNameException, InvalidDescriptionFormatException {
         categoryList = new CategoryList();
         transactionList = new TransactionList();
         command = new UpdateCategoryCommand(transactionList, categoryList);
@@ -83,6 +87,23 @@ class UpdateCategoryCommandTest {
     }
 
     @Test
+    void execute_wrongTransactionType_errorMessage() {
+        // Arrange
+        command.setArguments(Map.of(
+                "i/", "2",
+                "c/", "Transport"
+        ));
+        transactionList.addTransaction(
+                new Income(100, "Salary", "2024-01-01 1200"));
+        // Act
+        List<String> result = command.execute();
+
+        // Assert
+        assertEquals(CommandResultMessages.UPDATE_TRANSACTION_FAIL
+                + ErrorMessages.NOT_AN_EXPENSE, result.get(0));
+    }
+
+    @Test
     void execute_categoryNotFound_errorMessage() {
         // Arrange
         command.setArguments(Map.of(
@@ -111,7 +132,7 @@ class UpdateCategoryCommandTest {
 
         // Assert
         assertEquals(CommandResultMessages.UPDATE_TRANSACTION_FAIL
-                + "Your index is out of bound! Current list size: 1", result.get(0));
+                + ErrorMessages.INDEX_OUT_OF_BOUNDS + "1", result.get(0));
     }
 
     @Test
@@ -127,6 +148,6 @@ class UpdateCategoryCommandTest {
 
         // Assert
         assertEquals(CommandResultMessages.UPDATE_TRANSACTION_FAIL
-                + "Your index is out of bound! Current list size: 1", result.get(0));
+                + ErrorMessages.INDEX_OUT_OF_BOUNDS + "1", result.get(0));
     }
 }

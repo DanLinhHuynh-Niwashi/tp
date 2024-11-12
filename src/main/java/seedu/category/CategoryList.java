@@ -1,6 +1,10 @@
 package seedu.category;
 
 import seedu.datastorage.Storage;
+import seedu.exceptions.InvalidCategoryNameException;
+import seedu.exceptions.InvalidDescriptionFormatException;
+import seedu.message.ErrorMessages;
+import seedu.utils.DescriptionUtils;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -35,9 +39,17 @@ public class CategoryList {
     }
 
     // Add Category
-    public Category addCategory(Category newCategory) {
+    public Category addCategory(Category newCategory)
+            throws InvalidDescriptionFormatException, InvalidCategoryNameException {
+
+        DescriptionUtils.parseDescription(newCategory.getName());
+        if (newCategory.getName().equalsIgnoreCase("skip")
+            || newCategory.getName().equalsIgnoreCase("yes")
+            || newCategory.getName().equalsIgnoreCase("no")) {
+            throw new InvalidCategoryNameException(ErrorMessages.INVALID_CATEGORY_NAME);
+        }
         for (Category category : this.categories) {
-            if (category.getName().equalsIgnoreCase(newCategory.getName())) {
+            if (category.equals(newCategory)) {
                 logger.log(Level.INFO, "Category '" + newCategory.getName() + "' already exists!");
                 Storage.saveCategory(categories);
                 return null;
@@ -80,10 +92,4 @@ public class CategoryList {
         }
         return null;
     }
-    public void interactiveAddCategory(String categoryName) {
-        Category newCategory = new Category(categoryName);
-        addCategory(newCategory);
-    }
-
-
 }

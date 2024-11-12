@@ -40,6 +40,13 @@ public class ViewTotalCommand extends Command {
         messages.add(String.format("Total Income: $%.2f", totalIncome));
         messages.add(String.format("Total Expenses: $%.2f", totalExpenses));
         messages.add(String.format("Net Total: $%.2f", netTotal));
+        if (totalIncome > 1e15) {
+            messages.add(String.format("Note: Your Total Income exceeds 1e15, there may be a loss of precision."));
+        }
+        if (totalExpenses > 1e15) {
+            messages.add(String.format("Note: Your Total Expense exceeds 1e15, there may be a loss of precision."));
+        }
+
         return messages;
     }
 

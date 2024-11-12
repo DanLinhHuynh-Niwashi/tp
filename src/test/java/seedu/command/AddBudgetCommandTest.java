@@ -6,7 +6,9 @@ import seedu.message.CommandResultMessages;
 import seedu.message.ErrorMessages;
 import seedu.transaction.TransactionList;
 
+import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,10 +21,17 @@ class AddBudgetCommandTest {
         BudgetTracker budgetTracker = new BudgetTracker(transactionList);
         AddBudgetCommand command = new AddBudgetCommand(budgetTracker);
 
-        command.setArguments(Map.of("a/", "1000", "m/", "2024-12"));
+        // Get the current month to make sure the test always run
+        LocalDateTime currentDateTime = LocalDateTime.now();
+
+        // Format the current year and month as yyyy-MM
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        String monthStr = currentDateTime.format(formatter);
+
+        command.setArguments(Map.of("a/", "1000", "m/", monthStr));
         List<String> result = command.execute();
 
-        assertEquals(1000.0, budgetTracker.getMonthlyBudget(YearMonth.of(2024, 12)), 0.001);
+        assertEquals(1000.0, budgetTracker.getMonthlyBudget(YearMonth.now()), 0.001);
         assertEquals(CommandResultMessages.SET_BUDGET_SUCCESS + "1000.0", result.get(0));
     }
 
@@ -59,8 +68,15 @@ class AddBudgetCommandTest {
         BudgetTracker budgetTracker = new BudgetTracker(transactionList);
         AddBudgetCommand command = new AddBudgetCommand(budgetTracker);
 
+        // Get the current month to make sure the test always run
+        LocalDateTime currentDateTime = LocalDateTime.now();
+
+        // Format the current year and month as yyyy-MM
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        String monthStr = currentDateTime.format(formatter);
+
         // Invalid amount format (non-numeric value)
-        command.setArguments(Map.of("a/", "one thousand", "m/", "2024-12"));
+        command.setArguments(Map.of("a/", "one thousand", "m/", monthStr));
         List<String> result = command.execute();
 
         assertEquals(CommandResultMessages.SET_BUDGET_FAIL +
@@ -77,8 +93,8 @@ class AddBudgetCommandTest {
         command.setArguments(Map.of("a/", "1000", "m/", "12-2024"));
         List<String> result = command.execute();
 
-        assertEquals(CommandResultMessages.SET_BUDGET_FAIL + ErrorMessages.MESSAGE_INVALID_YEAR_MONTH_FORMAT,
-                result.get(0));
+        assertEquals(CommandResultMessages.SET_BUDGET_FAIL
+                        + ErrorMessages.MESSAGE_INVALID_YEAR_MONTH_FORMAT, result.get(0));
     }
 
 }

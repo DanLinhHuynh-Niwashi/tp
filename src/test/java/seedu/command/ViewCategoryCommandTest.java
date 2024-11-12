@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import seedu.category.Category;
 import seedu.category.CategoryList;
+import seedu.exceptions.InvalidCategoryNameException;
+import seedu.exceptions.InvalidDescriptionFormatException;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -23,7 +25,9 @@ class ViewCategoryCommandTest {
     }
 
     @Test
-    void setCategoryList_newCategoryList_equalCategoryList() throws NoSuchFieldException, IllegalAccessException{
+    void setCategoryList_newCategoryList_equalCategoryList()
+            throws NoSuchFieldException, IllegalAccessException,
+            InvalidCategoryNameException, InvalidDescriptionFormatException {
         // Expected list
         CategoryList temp = new CategoryList();
         temp.addCategory(new Category("Category test"));

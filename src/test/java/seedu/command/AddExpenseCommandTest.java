@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import seedu.category.Category;
 import seedu.category.CategoryList;
+import seedu.exceptions.InvalidCategoryNameException;
+import seedu.exceptions.InvalidDescriptionFormatException;
 import seedu.main.UI;
 import seedu.transaction.Expense;
 import seedu.transaction.Transaction;
@@ -36,7 +38,8 @@ class AddExpenseCommandTest {
     }
 
     @Test
-    void execute_addExpenseAllValidFields_success() {
+    void execute_addExpenseAllValidFields_success()
+            throws InvalidCategoryNameException, InvalidDescriptionFormatException {
         // Arrange
         categoryList.addCategory(new Category("Food"));
         command.setArguments(Map.of(
@@ -45,17 +48,15 @@ class AddExpenseCommandTest {
                 "d/", "2024-10-01 1800",
                 "c/", "Food"
         ));
-        List<Transaction> expectedList = List.of(
-                new Expense(1000, "dinner", "2024-10-01 1800", new Category("Food"))
-        );
+
+        Expense expectedExpense = new Expense(1000, "dinner", "2024-10-01 1800", new Category("Food"));
 
         // Act
         List<String> result = command.execute();
 
         // Assert
-        assertEquals(expectedList, transactionList.getTransactions());
-        assertEquals(CommandResultMessages.ADD_TRANSACTION_SUCCESS + expectedList.get(0).toString(),
-                result.get(0));
+        assertEquals(1, transactionList.size());
+        assertEquals(expectedExpense.toString(), transactionList.getTransactions().get(0).toString());
     }
 
     @Test
@@ -74,8 +75,7 @@ class AddExpenseCommandTest {
 
         // Assert
         assertEquals(expectedList, transactionList.getTransactions());
-        assertEquals(CommandResultMessages.ADD_TRANSACTION_FAIL + "Invalid amount format: invalid",
-                result.get(0));
+        assertEquals(CommandResultMessages.ADD_TRANSACTION_FAIL + "Invalid amount format: invalid", result.get(0));
     }
 
     @Test
@@ -94,12 +94,13 @@ class AddExpenseCommandTest {
 
         // Assert
         assertEquals(expectedList, transactionList.getTransactions());
-        assertEquals(CommandResultMessages.ADD_TRANSACTION_FAIL + "Your date and/or time is invalid!",
+        assertEquals(CommandResultMessages.ADD_TRANSACTION_FAIL + ErrorMessages.MESSAGE_INVALID_DATE_FORMAT,
                 result.get(0));
     }
 
     @Test
-    void execute_addExpenseNoDate_success() {
+    void execute_addExpenseNoDate_success()
+            throws InvalidCategoryNameException, InvalidDescriptionFormatException {
         // Arrange
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
         String currentDateTime = LocalDateTime.now().format(formatter);
@@ -110,15 +111,16 @@ class AddExpenseCommandTest {
                 "a/", "1000",
                 "c/", "Food"
         ));
-        List<Transaction> expectedList = List.of(
-                new Expense(1000, "dinner", currentDateTime, new Category("Food"))
-        );
+
+        Expense expectedExpense = new Expense(1000, "dinner", currentDateTime,
+                new Category("Food"));
 
         // Act
         List<String> result = command.execute();
 
         // Assert
-        assertEquals(expectedList, transactionList.getTransactions());
+        assertEquals(1, transactionList.size());
+        assertEquals(expectedExpense.toString(), transactionList.getTransactions().get(0).toString());
     }
 
     @Test
@@ -149,12 +151,13 @@ class AddExpenseCommandTest {
 
         // Assert
         assertEquals(0, transactionList.getTransactions().size());
-        assertEquals(CommandResultMessages.ADD_TRANSACTION_FAIL + "Invalid amount format: -1000",
-                result.get(0));
+        assertEquals(CommandResultMessages.ADD_TRANSACTION_FAIL
+                + ErrorMessages.NEGATIVE_AMOUNT +": -1000", result.get(0));
     }
 
     @Test
-    void execute_addExpenseNoDescription_success() {
+    void execute_addExpenseNoDescription_success()
+            throws InvalidCategoryNameException, InvalidDescriptionFormatException {
         // Arrange
         categoryList.addCategory(new Category("Food"));
         command.setArguments(Map.of(

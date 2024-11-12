@@ -1,0 +1,89 @@
+@startuml
+actor User
+participant "ui:UI" as UI
+participant ":Main" as Main
+
+participant "parser:Parser" as Parser
+participant "command:Command" as Command
+
+
+Main -> UI : getUserInput()'
+activate UI
+activate Main
+User -> UI : Request input
+UI --> Main : commandString: String
+deactivate UI
+Main -> Main : commandString.split(" ", 2)
+Main --> Main : commandParts: String[]
+Main -> Parser : parseCommand(commandParts[0])
+activate Parser
+alt Command not found
+    Parser --> Main : command: Command
+else Command found
+    Parser --> Main : null
+    deactivate Parser
+end
+alt Command not found
+    Main -> UI : printMessage(ERROR_MESSAGE)
+    activate UI
+    UI --> User : ERROR_MESSAGE
+    deactivate UI
+else Command found
+    Main -> Parser : extractArguments(command, commandParts[1])
+    activate Parser
+    Parser --> Main : arguments: Map<String, String>
+    deactivate Parser
+    Main -> Command : setArguments(arguments)
+    activate Command
+    Command --> Main :
+    deactivate Command
+    Main -> Command : execute()
+    activate Command
+    Command --> Main : result: List<String>
+    deactivate Command
+    Main -> UI : showCommandResult(result)
+    activate UI
+
+    UI --> User : result
+    deactivate UI
+end
+"Main" -[hidden]> "Main" :
+deactivate Main
+@enduml
+
+@startuml
+actor User
+
+package "UI layer" {
+    [Main] --> [UI]
+}
+User <-> [UI] : Input
+
+package "Command handling layer" {
+    [Main] -> [Parser]
+    [Parser] --> [Command]
+    [Main] -> [Command] : execute()
+}
+
+package "Data layer" {
+    [Command] --> [Storage]
+    [Command] --> [TransactionList]
+    [Command] --> [CategoryList]
+    [Command] --> [BudgetTracker]
+    [Storage] --> [TransactionList]
+    [Storage] --> [CategoryList]
+    [Storage] --> [BudgetTracker]
+    [TransactionList] -- [Transaction]
+    [CategoryList] -- [Category]
+    [BudgetTracker]
+}
+database transactions.json
+[Storage] <---> transactions.json
+database budgets.json
+[Storage] <---> budgets.json
+database categories.json
+[Storage] <--> categories.json
+
+[Main] -> [Storage]
+
+@enduml

@@ -3,6 +3,8 @@ package seedu.command;
 import seedu.category.Category;
 import seedu.category.CategoryList;
 import seedu.datastorage.Storage;
+import seedu.exceptions.InvalidCategoryNameException;
+import seedu.exceptions.InvalidDescriptionFormatException;
 import seedu.message.ErrorMessages;
 import seedu.message.CommandResultMessages;
 
@@ -50,8 +52,17 @@ public class AddCategoryCommand extends Command {
         }
 
         String categoryName = arguments.get("");
+
         Category category = new Category(categoryName);
-        Category temp = categoryList.addCategory(category);
+        Category temp = null;
+        try {
+            temp = categoryList.addCategory(category);
+        } catch (InvalidDescriptionFormatException e) {
+            return List.of(CommandResultMessages.ADD_CATEGORY_FAIL + e.getMessage(),
+                    ErrorMessages.INVALID_DESCRIPTION_GUIDE);
+        } catch (InvalidCategoryNameException e) {
+            return List.of(CommandResultMessages.ADD_CATEGORY_FAIL + e.getMessage());
+        }
 
         if (temp == null) {
             return List.of(CommandResultMessages.ADD_CATEGORY_FAIL + ErrorMessages.DUPLICATED_CATEGORY);

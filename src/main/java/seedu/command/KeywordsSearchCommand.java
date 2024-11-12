@@ -21,7 +21,8 @@ public class KeywordsSearchCommand extends Command {
     /** Command word for invoking this command. */
     public static final String COMMAND_WORD = "search";
     /** Command usage guide for users. */
-    public static final String COMMAND_GUIDE = "search k/ [keyword_1] [keyword_2] ... [keyword_n]";
+    public static final String COMMAND_GUIDE = "search k/ [keyword_1] [keyword_2] ... [keyword_n]:" +
+            " Search transaction by keywords";
     /** Keywords required for the command to execute correctly. */
     public static final String[] COMMAND_MANDATORY_KEYWORDS = {"k/"};
     /** Optional keywords that can be used with the command. */

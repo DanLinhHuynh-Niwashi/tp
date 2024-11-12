@@ -2,6 +2,7 @@ package seedu.command;
 
 import seedu.category.Category;
 import seedu.category.CategoryList;
+import seedu.datastorage.Storage;
 import seedu.exceptions.CategoryNotFoundException;
 import seedu.exceptions.InvalidTransactionTypeException;
 import seedu.message.ErrorMessages;
@@ -48,6 +49,7 @@ public class UpdateCategoryCommand extends Command {
             }
 
             Transaction temp = transactions.updateCategory(transactionIndex, newCategory);
+            Storage.saveTransaction(transactions.getTransactions());
 
             return List.of(CommandResultMessages.UPDATE_TRANSACTION_SUCCESS + temp.toString());
         } catch (NumberFormatException e) {

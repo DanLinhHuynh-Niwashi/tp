@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -110,20 +111,26 @@ public class TransactionListTest {
     @Test
     public void testSearchTransactionsByKeywords() {
         TransactionList transactionList = new TransactionList();
-        List<Transaction> transactions = new ArrayList<Transaction>();
         transactionList.addTransaction(new Income(1000, "Salary", "2024-11-01"));
         transactionList.addTransaction(new Expense(200, "Groceries", "2024-11-01"));
         transactionList.addTransaction(new Expense(300, "Lunch", "2024-11-01"));
         transactionList.addTransaction(new Expense(400, "Buy Groceries", "2024-11-01"));
+
         List<String> keywords = new ArrayList<String>();
         keywords.add("Buy");
-        List<Transaction> resultSingle = transactionList.searchTransactionsByKeywords(keywords);
-        List<Transaction> comparator = new ArrayList<Transaction>();
-        comparator.add(new Expense(400, "Buy Groceries", "2024-11-01"));
+        List<String> resultSingle = transactionList.searchTransactionsByKeywords(keywords)
+                .stream()
+                .map(Transaction::toString)
+                .collect(Collectors.toList());
+        List<String> comparator = new ArrayList<>();
+        comparator.add(new Expense(400, "Buy Groceries", "2024-11-01").toString());
         assertEquals(resultSingle, comparator);
         keywords.add("Groceries");
-        List<Transaction> resultDouble = transactionList.searchTransactionsByKeywords(keywords);
-        comparator.add(new Expense(200, "Groceries", "2024-11-01"));
+        List<String> resultDouble = transactionList.searchTransactionsByKeywords(keywords)
+                .stream()
+                .map(Transaction::toString)
+                .collect(Collectors.toList());;
+        comparator.add(new Expense(200, "Groceries", "2024-11-01").toString());
         assertEquals(resultDouble, comparator);
     }
 }
